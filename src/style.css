@@ -1,0 +1,172 @@
+:root {
+	--edge: 36px;
+	--bg: #0b0b0d;
+	--fg: #f5f5f4;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--fg);
+	font-family:
+		ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	overflow: hidden;
+}
+
+/* Fullscreen art — the current cover, scaled to cover the viewport.
+   The source is square, so on a wide screen `cover` crops it heavily. We keep
+   that (it's the point — edge-to-edge art) and lean on the scrim below for
+   text contrast. */
+#backdrop {
+	position: fixed;
+	inset: 0;
+	background-color: var(--bg);
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+	opacity: 0;
+	transition: opacity 700ms ease, background-image 0ms;
+}
+
+#backdrop[data-loaded='true'] {
+	opacity: 1;
+}
+
+/* Keeps the overlaid text readable over bright artwork. */
+#backdrop::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.15) 45%, rgba(0, 0, 0, 0.45));
+}
+
+#stage {
+	position: relative;
+	height: 100dvh;
+	width: 100%;
+}
+
+#meta {
+	position: absolute;
+	top: max(var(--edge), env(safe-area-inset-top));
+	left: max(var(--edge), env(safe-area-inset-left));
+	display: grid;
+	grid-template-columns: 36px 1fr;
+	align-items: center;
+	gap: 12px;
+	max-width: min(420px, calc(100vw - var(--edge) * 2));
+	opacity: 0;
+	transition: opacity 500ms ease;
+	text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+}
+
+#meta[data-loaded='true'] {
+	opacity: 1;
+}
+
+#cover {
+	width: 36px;
+	height: 36px;
+	border-radius: 3px;
+	object-fit: cover;
+	display: block;
+	background: rgba(255, 255, 255, 0.08);
+}
+
+#text {
+	display: grid;
+	gap: 2px;
+	min-width: 0;
+}
+
+#text p {
+	margin: 0;
+	line-height: 1.25;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#title {
+	font-size: 14px;
+	font-weight: 600;
+}
+
+#artist {
+	font-size: 13px;
+	font-weight: 400;
+	opacity: 0.75;
+}
+
+/* Play/pause lives centre-screen, but stays out of the way while the stream is
+   running — hidden by default, shown whenever playback is stopped (including
+   when autoplay was blocked and we need a gesture). Double-click always works. */
+#toggle {
+	visibility: hidden;
+	opacity: 0;
+	pointer-events: none;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 72px;
+	height: 72px;
+	padding: 0;
+	border: 0;
+	border-radius: 999px;
+	color: var(--fg);
+	background: rgba(0, 0, 0, 0.35);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	cursor: pointer;
+	transition: opacity 250ms ease, transform 200ms ease, background-color 200ms ease;
+}
+
+/* Stopped (or autoplay blocked) → offer the button. */
+body[data-playing='false'] #toggle,
+body[data-needs-gesture='true'][data-playing='false'] #toggle {
+	visibility: visible;
+	opacity: 0.85;
+	pointer-events: auto;
+}
+
+body[data-playing='false'] #toggle:hover,
+body[data-playing='false'] #toggle:focus-visible {
+	opacity: 1;
+	background: rgba(0, 0, 0, 0.5);
+	transform: translate(-50%, -50%) scale(1.05);
+}
+
+#toggle svg {
+	width: 32px;
+	height: 32px;
+}
+
+#toggle svg[hidden] {
+	display: none;
+}
+
+#audio {
+	display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#backdrop,
+	#meta,
+	#toggle {
+		transition: none;
+	}
+}

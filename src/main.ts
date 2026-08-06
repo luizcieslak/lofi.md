@@ -1,0 +1,91 @@
+import './style.css'
+import { createRadioPlayer } from './radio-player'
+
+const RADIO_API = import.meta.env.VITE_RADIO_API_URL
+
+if (!RADIO_API) {
+	throw new Error('VITE_RADIO_API_URL is not set — copy .env.example to .env')
+}
+
+const audio = document.getElementById('audio') as HTMLAudioElement
+const backdrop = document.getElementById('backdrop') as HTMLDivElement
+const meta = document.getElementById('meta') as HTMLDivElement
+const cover = document.getElementById('cover') as HTMLImageElement
+const titleEl = document.getElementById('title') as HTMLParagraphElement
+const artistEl = document.getElementById('artist') as HTMLParagraphElement
+const toggle = document.getElementById('toggle') as HTMLButtonElement
+const iconPlay = document.getElementById('icon-play') as unknown as SVGElement
+const iconPause = document.getElementById('icon-pause') as unknown as SVGElement
+
+const player = createRadioPlayer(audio, RADIO_API)
+
+toggle.addEventListener('click', () => player.toggle())
+
+// Double-click anywhere on the art toggles playback. Once the stream is running
+// this is the primary control — the button is only a fallback for the
+// autoplay-blocked case.
+document.getElementById('stage')!.addEventListener('dblclick', event => {
+	if (event.target === toggle || toggle.contains(event.target as Node)) return
+	player.toggle()
+})
+
+// Space toggles playback, as long as focus isn't already on the button
+// (where the browser fires a click of its own).
+document.addEventListener('keydown', event => {
+	if (event.code !== 'Space' || event.target === toggle) return
+	event.preventDefault()
+	player.toggle()
+})
+
+// Browsers refuse unmuted autoplay without a gesture. Try anyway; if we're
+// blocked, reveal the play button so there's something to click.
+void player.tryAutoplay().then(started => {
+	if (!started) document.body.dataset.needsGesture = 'true'
+})
+
+let currentCover = ''
+
+function setCover(url: string) {
+	if (url === currentCover) return
+	currentCover = url
+
+	// Swap the backdrop only once the image is decoded, so we never flash an
+	// empty frame between tracks.
+	const preload = new Image()
+	preload.crossOrigin = 'anonymous'
+	preload.onload = () => {
+		if (currentCover !== url) return
+		backdrop.style.backgroundImage = `url("${url}")`
+		backdrop.dataset.loaded = 'true'
+	}
+	preload.src = url
+
+	cover.src = url
+}
+
+player.subscribe(state => {
+	const track = state.track
+
+	titleEl.textContent = track?.title || ''
+	artistEl.textContent = track?.artist || ''
+
+	const art = track?.albumArtUrl || track?.coverUrl || ''
+	if (art) setCover(art)
+
+	cover.alt = track?.title ? `${track.title} cover art` : ''
+	meta.dataset.loaded = track?.title ? 'true' : 'false'
+
+	document.title = track?.title
+		? track.artist
+			? `${track.title} — ${track.artist}`
+			: track.title
+		: 'lofi.md'
+
+	toggle.setAttribute('aria-label', state.wantPlaying ? 'Pause' : 'Play')
+	iconPlay.toggleAttribute('hidden', state.wantPlaying)
+	iconPause.toggleAttribute('hidden', !state.wantPlaying)
+
+	// While playing, the art stands alone — double-click is the control. When
+	// stopped, offer the button again so there's always an obvious way back in.
+	document.body.dataset.playing = state.wantPlaying ? 'true' : 'false'
+})

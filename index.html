@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+		<meta name="description" content="A standalone lofi radio player." />
+		<meta name="theme-color" content="#0b0b0d" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<title>lofi.md</title>
+	</head>
+	<body>
+		<!-- Fullscreen art: the cover, blown up and blurred, fills the viewport. -->
+		<div id="backdrop" aria-hidden="true"></div>
+
+		<main id="stage">
+			<!-- 36x36 cover + two rows of text, 36px from the top and left edges. -->
+			<div id="meta" data-loaded="false">
+				<img id="cover" alt="" crossorigin="anonymous" width="36" height="36" />
+				<div id="text">
+					<p id="title"></p>
+					<p id="artist"></p>
+				</div>
+			</div>
+
+			<button id="toggle" type="button" aria-label="Play">
+				<svg id="icon-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+					<path d="M8 5v14l11-7z" />
+				</svg>
+				<svg id="icon-pause" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" hidden>
+					<path d="M6 5h4v14H6zM14 5h4v14h-4z" />
+				</svg>
+			</button>
+		</main>
+
+		<audio id="audio" preload="none"></audio>
+
+		<script type="module" src="/src/main.ts"></script>
+	</body>
+</html>
