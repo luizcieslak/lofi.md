@@ -10,7 +10,16 @@
 
 html,
 body {
-	height: 100%;
+	min-height: 100%;
+}
+
+html {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+	display: none;
 }
 
 body {
@@ -20,7 +29,28 @@ body {
 	font-family:
 		ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 	-webkit-font-smoothing: antialiased;
+	/* The stage fills the viewport and the footer sits just below the fold, so
+	   the only scrollable distance is the footer's own height. The scrollbar is
+	   hidden to keep the art edge-to-edge — the page still scrolls normally. */
+	overflow-x: hidden;
+	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none; /* legacy Edge */
+}
+
+body::-webkit-scrollbar {
+	display: none; /* Chrome, Safari */
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
 	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
 }
 
 /* Fullscreen art — the current cover, scaled to cover the viewport.
@@ -50,8 +80,11 @@ body {
 	background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.15) 45%, rgba(0, 0, 0, 0.45));
 }
 
+/* Fixed, so the art and its controls stay put while the footer scrolls up over
+   them. The spacer below reserves the matching scroll distance. */
 #stage {
-	position: relative;
+	position: fixed;
+	inset: 0;
 	height: 100dvh;
 	width: 100%;
 }
@@ -157,6 +190,49 @@ body[data-playing='false'] #toggle:focus-visible {
 
 #toggle svg[hidden] {
 	display: none;
+}
+
+/* Pushed a full viewport down so it starts exactly at the fold — #stage is
+   fixed and out of flow, so this margin is what creates the scroll distance.
+   Scrolling brings the footer up over the art; it fades in as it arrives. */
+#footer {
+	position: relative;
+	margin-top: 100dvh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 28px max(var(--edge), env(safe-area-inset-left))
+		max(28px, env(safe-area-inset-bottom)) max(var(--edge), env(safe-area-inset-right));
+	background: linear-gradient(to bottom, rgba(11, 11, 13, 0.75), rgba(11, 11, 13, 0.95));
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	opacity: 0;
+	transition: opacity 400ms ease;
+}
+
+#footer[data-visible='true'] {
+	opacity: 1;
+}
+
+#footer p {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	text-align: center;
+	opacity: 0.75;
+}
+
+#footer a {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	text-decoration-color: rgba(245, 245, 244, 0.4);
+	transition: text-decoration-color 200ms ease;
+}
+
+#footer a:hover,
+#footer a:focus-visible {
+	text-decoration-color: currentColor;
 }
 
 #audio {

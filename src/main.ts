@@ -37,6 +37,17 @@ document.addEventListener('keydown', event => {
 	player.toggle()
 })
 
+// The footer lives below the fold; fade it in once scrolling brings it into view.
+const footer = document.getElementById('footer') as HTMLElement
+new IntersectionObserver(
+	entries => {
+		for (const entry of entries) {
+			footer.dataset.visible = entry.isIntersecting ? 'true' : 'false'
+		}
+	},
+	{ threshold: 0.25 },
+).observe(footer)
+
 // Browsers refuse unmuted autoplay without a gesture. Try anyway; if we're
 // blocked, reveal the play button so there's something to click.
 void player.tryAutoplay().then(started => {
