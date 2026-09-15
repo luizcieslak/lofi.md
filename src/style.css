@@ -62,7 +62,7 @@ body::-webkit-scrollbar {
 	position: fixed;
 	inset: 0;
 	background-color: var(--bg);
-	background-image: url('/banner.jpeg');
+	background-image: url('/banner.webp');
 	background-position: center;
 	background-size: cover;
 	background-repeat: no-repeat;
