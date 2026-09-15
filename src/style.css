@@ -91,19 +91,46 @@ body::-webkit-scrollbar {
    cleanly against the corner it's anchored to.
 
    The block is tilted in 3D to sit on the illustration's back wall, which
-   recedes toward the right edge. Tune it with the four knobs below:
+   recedes toward the right edge:
      --meta-perspective  lower = stronger, more dramatic foreshortening
      --meta-rotate-y     negative pushes the RIGHT edge away (matches this wall)
      --meta-rotate-x     positive tips the TOP away from the viewer
      --meta-rotate-z     positive rolls clockwise, to follow the wall's slope
-   `perspective-origin` sits at the block's right edge because that's the end
-   anchored to the corner — rotation should appear to pivot from there. */
-#meta {
+   `transform-origin` sits at the block's right edge because that's the end
+   anchored to the corner — rotation should appear to pivot from there.
 
+   Every --meta-* value below is driven by the dev-only tuning panel in
+   meta-tuner.ts; `Copy CSS` there emits the whole set ready to paste back. */
+#meta {
 	--meta-perspective: 2000px;
-	--meta-rotate-y: -11.5deg;
-	--meta-rotate-x: 1deg;
-	--meta-rotate-z: -0.5deg;
+	--meta-rotate-y: -0deg;
+	--meta-rotate-x: 0deg;
+	--meta-rotate-z: -0deg;
+
+	/* Scrim behind the block, so the text stays readable wherever it sits on the
+	   art. Alpha is its own knob — the colour is fixed, only the opacity moves. */
+	--meta-bg-alpha: 0.55;
+
+	/* One knob drives both the image box and the grid track it occupies, so the
+	   cover can never desync from its column. */
+	--meta-cover-size: 36px;
+
+	--meta-title-size: 14px;
+	--meta-artist-size: 13px;
+
+	/* Vertical/horizontal padding as separate knobs. In px rather than em so they
+	   stay put when the title/artist sizes change. */
+	--meta-pad-y: 16px;
+	--meta-pad-x: 16px;
+
+	/* Floor for the block's width, so a short title doesn't collapse it into a
+	   sliver. Slide to 0 to let it shrink to its content; max-width below still
+	   wins on narrow screens. */
+	--meta-min-width: 160px;
+
+	background: rgba(0, 0, 0, var(--meta-bg-alpha));
+	padding: var(--meta-pad-y) var(--meta-pad-x);
+	min-width: var(--meta-min-width);
 
 	/* Gap from the top/right edges, as plain px so the tuner reads and writes
 	   them literally — what you tune is what you paste back. Safe-area insets are
@@ -116,7 +143,7 @@ body::-webkit-scrollbar {
 	top: calc(var(--meta-top) + env(safe-area-inset-top));
 	right: calc(var(--meta-right) + env(safe-area-inset-right));
 	display: grid;
-	grid-template-columns: 1fr 36px;
+	grid-template-columns: 1fr var(--meta-cover-size);
 	align-items: center;
 	gap: 12px;
 	text-align: right;
@@ -136,8 +163,8 @@ body::-webkit-scrollbar {
 }
 
 #cover {
-	width: 36px;
-	height: 36px;
+	width: var(--meta-cover-size);
+	height: var(--meta-cover-size);
 	border-radius: 3px;
 	object-fit: cover;
 	display: block;
@@ -159,12 +186,12 @@ body::-webkit-scrollbar {
 }
 
 #title {
-	font-size: 14px;
+	font-size: var(--meta-title-size);
 	font-weight: 600;
 }
 
 #artist {
-	font-size: 13px;
+	font-size: var(--meta-artist-size);
 	font-weight: 400;
 	opacity: 0.75;
 }

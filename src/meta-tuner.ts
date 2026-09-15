@@ -20,9 +20,18 @@ const KNOBS: Knob[] = [
 	{ prop: '--meta-top', label: 'top', min: 0, max: 1200, step: 1, unit: 'px' },
 	{ prop: '--meta-right', label: 'right', min: 0, max: 1200, step: 1, unit: 'px' },
 	{ prop: '--meta-perspective', label: 'perspective', min: 120, max: 4000, step: 10, unit: 'px' },
-	{ prop: '--meta-rotate-y', label: 'rotateY', min: -200, max: 200, step: 0.5, unit: 'deg' },
-	{ prop: '--meta-rotate-x', label: 'rotateX', min: -200, max: 200, step: 0.5, unit: 'deg' },
-	{ prop: '--meta-rotate-z', label: 'rotateZ', min: -200, max: 200, step: 0.5, unit: 'deg' },
+	{ prop: '--meta-rotate-y', label: 'rotateY', min: -60, max: 60, step: 0.5, unit: 'deg' },
+	{ prop: '--meta-rotate-x', label: 'rotateX', min: -60, max: 60, step: 0.5, unit: 'deg' },
+	{ prop: '--meta-rotate-z', label: 'rotateZ', min: -60, max: 60, step: 0.5, unit: 'deg' },
+	// Unitless: the empty unit makes `write` emit a bare number, which is what
+	// rgba() needs, and makes the unit check in `read` a no-op.
+	{ prop: '--meta-bg-alpha', label: 'bg alpha', min: 0, max: 1, step: 0.01, unit: '' },
+	{ prop: '--meta-cover-size', label: 'cover', min: 0, max: 240, step: 1, unit: 'px' },
+	{ prop: '--meta-title-size', label: 'title', min: 8, max: 72, step: 0.5, unit: 'px' },
+	{ prop: '--meta-artist-size', label: 'artist', min: 8, max: 72, step: 0.5, unit: 'px' },
+	{ prop: '--meta-pad-y', label: 'pad Y', min: 0, max: 120, step: 1, unit: 'px' },
+	{ prop: '--meta-pad-x', label: 'pad X', min: 0, max: 120, step: 1, unit: 'px' },
+	{ prop: '--meta-min-width', label: 'min width', min: 0, max: 600, step: 1, unit: 'px' },
 ]
 
 const STORAGE_KEY = 'meta-tuner'
