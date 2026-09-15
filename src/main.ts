@@ -36,9 +36,21 @@ document.addEventListener('keydown', event => {
 	player.toggle()
 })
 
-// Tuning panel for the #meta wall tilt. Dev-only — the dynamic import keeps it
-// out of the production bundle entirely.
-if (import.meta.env.DEV) {
+// Tuning panel for the #meta wall tilt.
+//
+// Always available in dev. In a production build it ships only when built with
+// VITE_ENABLE_TUNER=true, and even then it stays hidden until you ask for it
+// with ?tuner — so a tuner-enabled deploy looks normal to everyone else.
+//
+// Vite inlines import.meta.env.* at build time, so when the flag is off this
+// whole branch is statically false and the dynamic import is tree-shaken: the
+// panel's code never enters the bundle. Env vars are strings, so compare
+// explicitly — 'false' would otherwise be truthy.
+const tunerBuilt = import.meta.env.DEV || import.meta.env.VITE_ENABLE_TUNER === 'true'
+const tunerRequested =
+	import.meta.env.DEV || new URLSearchParams(location.search).has('tuner')
+
+if (tunerBuilt && tunerRequested) {
 	void import('./meta-tuner').then(({ mountMetaTuner }) => mountMetaTuner(meta))
 }
 
