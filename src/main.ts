@@ -36,6 +36,12 @@ document.addEventListener('keydown', event => {
 	player.toggle()
 })
 
+// Tuning panel for the #meta wall tilt. Dev-only — the dynamic import keeps it
+// out of the production bundle entirely.
+if (import.meta.env.DEV) {
+	void import('./meta-tuner').then(({ mountMetaTuner }) => mountMetaTuner(meta))
+}
+
 // The footer lives below the fold; fade it in once scrolling brings it into view.
 const footer = document.getElementById('footer') as HTMLElement
 new IntersectionObserver(

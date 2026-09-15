@@ -85,21 +85,50 @@ body::-webkit-scrollbar {
 	width: 100%;
 }
 
+
+
 /* Top-right, with the cover art on the right of the text so the block mirrors
-   cleanly against the corner it's anchored to. */
+   cleanly against the corner it's anchored to.
+
+   The block is tilted in 3D to sit on the illustration's back wall, which
+   recedes toward the right edge. Tune it with the four knobs below:
+     --meta-perspective  lower = stronger, more dramatic foreshortening
+     --meta-rotate-y     negative pushes the RIGHT edge away (matches this wall)
+     --meta-rotate-x     positive tips the TOP away from the viewer
+     --meta-rotate-z     positive rolls clockwise, to follow the wall's slope
+   `perspective-origin` sits at the block's right edge because that's the end
+   anchored to the corner — rotation should appear to pivot from there. */
 #meta {
+
+	--meta-perspective: 2000px;
+	--meta-rotate-y: -11.5deg;
+	--meta-rotate-x: 1deg;
+	--meta-rotate-z: -0.5deg;
+
+	/* Gap from the top/right edges, as plain px so the tuner reads and writes
+	   them literally — what you tune is what you paste back. Safe-area insets are
+	   added rather than used as a floor, so the gap is measured from the safe
+	   edge and a notch or rounded corner just shifts the block inward. */
+	--meta-top: 36px;
+	--meta-right: 36px;
+
 	position: absolute;
-	top: max(var(--edge), env(safe-area-inset-top));
-	right: max(var(--edge), env(safe-area-inset-right));
+	top: calc(var(--meta-top) + env(safe-area-inset-top));
+	right: calc(var(--meta-right) + env(safe-area-inset-right));
 	display: grid;
 	grid-template-columns: 1fr 36px;
 	align-items: center;
 	gap: 12px;
 	text-align: right;
-	max-width: min(420px, calc(100vw - max(var(--edge), env(safe-area-inset-right)) * 2));
+	max-width: min(420px, calc(100vw - (var(--meta-right) + env(safe-area-inset-right)) * 2));
 	opacity: 0;
 	transition: opacity 500ms ease;
 	text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+
+	transform: perspective(var(--meta-perspective)) rotateY(var(--meta-rotate-y))
+		rotateX(var(--meta-rotate-x)) rotateZ(var(--meta-rotate-z));
+	transform-origin: 100% 50%;
+	transform-style: preserve-3d;
 }
 
 #meta[data-loaded='true'] {
