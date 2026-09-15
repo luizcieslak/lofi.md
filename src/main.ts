@@ -8,7 +8,6 @@ if (!RADIO_API) {
 }
 
 const audio = document.getElementById('audio') as HTMLAudioElement
-const backdrop = document.getElementById('backdrop') as HTMLDivElement
 const meta = document.getElementById('meta') as HTMLDivElement
 const cover = document.getElementById('cover') as HTMLImageElement
 const titleEl = document.getElementById('title') as HTMLParagraphElement
@@ -56,21 +55,11 @@ void player.tryAutoplay().then(started => {
 
 let currentCover = ''
 
+// The fullscreen backdrop is the fixed banner art (set in CSS); per-track art
+// only ever fills the small thumbnail beside the title.
 function setCover(url: string) {
 	if (url === currentCover) return
 	currentCover = url
-
-	// Swap the backdrop only once the image is decoded, so we never flash an
-	// empty frame between tracks.
-	const preload = new Image()
-	preload.crossOrigin = 'anonymous'
-	preload.onload = () => {
-		if (currentCover !== url) return
-		backdrop.style.backgroundImage = `url("${url}")`
-		backdrop.dataset.loaded = 'true'
-	}
-	preload.src = url
-
 	cover.src = url
 }
 
