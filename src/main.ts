@@ -8,7 +8,6 @@ if (!RADIO_API) {
 }
 
 const audio = document.getElementById('audio') as HTMLAudioElement
-const backdrop = document.getElementById('backdrop') as HTMLDivElement
 const meta = document.getElementById('meta') as HTMLDivElement
 const cover = document.getElementById('cover') as HTMLImageElement
 const titleEl = document.getElementById('title') as HTMLParagraphElement
@@ -37,6 +36,24 @@ document.addEventListener('keydown', event => {
 	player.toggle()
 })
 
+// Tuning panel for the #meta wall tilt.
+//
+// Always available in dev. In a production build it ships only when built with
+// VITE_ENABLE_TUNER=true, and even then it stays hidden until you ask for it
+// with ?tuner — so a tuner-enabled deploy looks normal to everyone else.
+//
+// Vite inlines import.meta.env.* at build time, so when the flag is off this
+// whole branch is statically false and the dynamic import is tree-shaken: the
+// panel's code never enters the bundle. Env vars are strings, so compare
+// explicitly — 'false' would otherwise be truthy.
+const tunerBuilt = import.meta.env.DEV || import.meta.env.VITE_ENABLE_TUNER === 'true'
+const tunerRequested =
+	import.meta.env.DEV || new URLSearchParams(location.search).has('tuner')
+
+if (tunerBuilt && tunerRequested) {
+	void import('./meta-tuner').then(({ mountMetaTuner }) => mountMetaTuner(meta))
+}
+
 // The footer lives below the fold; fade it in once scrolling brings it into view.
 const footer = document.getElementById('footer') as HTMLElement
 new IntersectionObserver(
@@ -56,21 +73,11 @@ void player.tryAutoplay().then(started => {
 
 let currentCover = ''
 
+// The fullscreen backdrop is the fixed banner art (set in CSS); per-track art
+// only ever fills the small thumbnail beside the title.
 function setCover(url: string) {
 	if (url === currentCover) return
 	currentCover = url
-
-	// Swap the backdrop only once the image is decoded, so we never flash an
-	// empty frame between tracks.
-	const preload = new Image()
-	preload.crossOrigin = 'anonymous'
-	preload.onload = () => {
-		if (currentCover !== url) return
-		backdrop.style.backgroundImage = `url("${url}")`
-		backdrop.dataset.loaded = 'true'
-	}
-	preload.src = url
-
 	cover.src = url
 }
 

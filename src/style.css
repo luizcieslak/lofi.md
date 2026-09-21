@@ -53,23 +53,19 @@ body::-webkit-scrollbar {
 	border: 0;
 }
 
-/* Fullscreen art — the current cover, scaled to cover the viewport.
-   The source is square, so on a wide screen `cover` crops it heavily. We keep
-   that (it's the point — edge-to-edge art) and lean on the scrim below for
-   text contrast. */
+/* Fullscreen art — the banner illustration, scaled to cover the viewport.
+   It's a fixed piece of art rather than per-track cover art, so it's set here
+   and never swapped at runtime. The source is 16:9; on a narrow screen `cover`
+   crops the sides, so the centre of the illustration is what's guaranteed to
+   stay in frame. The scrim below carries text contrast over the bright walls. */
 #backdrop {
 	position: fixed;
 	inset: 0;
 	background-color: var(--bg);
+	background-image: url('/banner.webp');
 	background-position: center;
 	background-size: cover;
 	background-repeat: no-repeat;
-	opacity: 0;
-	transition: opacity 700ms ease, background-image 0ms;
-}
-
-#backdrop[data-loaded='true'] {
-	opacity: 1;
 }
 
 /* Keeps the overlaid text readable over bright artwork. */
@@ -89,18 +85,77 @@ body::-webkit-scrollbar {
 	width: 100%;
 }
 
+
+
+/* Top-right, with the cover art on the right of the text so the block mirrors
+   cleanly against the corner it's anchored to.
+
+   The block is tilted in 3D to sit on the illustration's back wall, which
+   recedes toward the right edge:
+     --meta-perspective  lower = stronger, more dramatic foreshortening
+     --meta-rotate-y     negative pushes the RIGHT edge away (matches this wall)
+     --meta-rotate-x     positive tips the TOP away from the viewer
+     --meta-rotate-z     positive rolls clockwise, to follow the wall's slope
+   `transform-origin` sits at the block's right edge because that's the end
+   anchored to the corner — rotation should appear to pivot from there.
+
+   Every --meta-* value below is driven by the dev-only tuning panel in
+   meta-tuner.ts; `Copy CSS` there emits the whole set ready to paste back. */
 #meta {
+	--meta-perspective: 2000px;
+	--meta-rotate-y: -0deg;
+	--meta-rotate-x: 0deg;
+	--meta-rotate-z: -0deg;
+
+	/* Scrim behind the block, so the text stays readable wherever it sits on the
+	   art. Alpha is its own knob — the colour is fixed, only the opacity moves. */
+	--meta-bg-alpha: 0.55;
+
+	/* One knob drives both the image box and the grid track it occupies, so the
+	   cover can never desync from its column. */
+	--meta-cover-size: 36px;
+
+	--meta-title-size: 14px;
+	--meta-artist-size: 13px;
+
+	/* Vertical/horizontal padding as separate knobs. In px rather than em so they
+	   stay put when the title/artist sizes change. */
+	--meta-pad-y: 16px;
+	--meta-pad-x: 16px;
+
+	/* Floor for the block's width, so a short title doesn't collapse it into a
+	   sliver. Slide to 0 to let it shrink to its content; max-width below still
+	   wins on narrow screens. */
+	--meta-min-width: 160px;
+
+	background: rgba(0, 0, 0, var(--meta-bg-alpha));
+	padding: var(--meta-pad-y) var(--meta-pad-x);
+	min-width: var(--meta-min-width);
+
+	/* Gap from the top/right edges, as plain px so the tuner reads and writes
+	   them literally — what you tune is what you paste back. Safe-area insets are
+	   added rather than used as a floor, so the gap is measured from the safe
+	   edge and a notch or rounded corner just shifts the block inward. */
+	--meta-top: 36px;
+	--meta-right: 36px;
+
 	position: absolute;
-	top: max(var(--edge), env(safe-area-inset-top));
-	left: max(var(--edge), env(safe-area-inset-left));
+	top: calc(var(--meta-top) + env(safe-area-inset-top));
+	right: calc(var(--meta-right) + env(safe-area-inset-right));
 	display: grid;
-	grid-template-columns: 36px 1fr;
+	grid-template-columns: 1fr var(--meta-cover-size);
 	align-items: center;
 	gap: 12px;
-	max-width: min(420px, calc(100vw - var(--edge) * 2));
+	text-align: right;
+	max-width: min(420px, calc(100vw - (var(--meta-right) + env(safe-area-inset-right)) * 2));
 	opacity: 0;
 	transition: opacity 500ms ease;
 	text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+
+	transform: perspective(var(--meta-perspective)) rotateY(var(--meta-rotate-y))
+		rotateX(var(--meta-rotate-x)) rotateZ(var(--meta-rotate-z));
+	transform-origin: 100% 50%;
+	transform-style: preserve-3d;
 }
 
 #meta[data-loaded='true'] {
@@ -108,8 +163,8 @@ body::-webkit-scrollbar {
 }
 
 #cover {
-	width: 36px;
-	height: 36px;
+	width: var(--meta-cover-size);
+	height: var(--meta-cover-size);
 	border-radius: 3px;
 	object-fit: cover;
 	display: block;
@@ -131,12 +186,12 @@ body::-webkit-scrollbar {
 }
 
 #title {
-	font-size: 14px;
+	font-size: var(--meta-title-size);
 	font-weight: 600;
 }
 
 #artist {
-	font-size: 13px;
+	font-size: var(--meta-artist-size);
 	font-weight: 400;
 	opacity: 0.75;
 }
