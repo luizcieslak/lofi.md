@@ -20,7 +20,10 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # --- tunables ---------------------------------------------------------------
 
-HASHTAGS="#lofi #lofihiphop #studymusic #lofiradio #codingmusic"
+# TikTok and YouTube Shorts share the long set; Instagram gets its own, because
+# Buffer keeps only the first 5 tags on a Reel and these are the 5 worth keeping.
+HASHTAGS="#lofi #lowfi #chill #music #catjam #lofihiphop #studymusic #lofiradio #codingmusic"
+INSTAGRAM_HASHTAGS_BASE="#lofi #lofihiphop #studymusic #lofiradio #codingmusic"
 
 YOUTUBE_CATEGORY_ID="10" # Music
 YOUTUBE_PRIVACY="public"
@@ -256,7 +259,7 @@ DESCRIPTION_BODY="${split_result%%$'\x1f'*}"
 INLINE_HASHTAGS="${split_result#*$'\x1f'}"
 
 ALL_HASHTAGS="$(merge_hashtags "$INLINE_HASHTAGS" "$HASHTAGS")"
-INSTAGRAM_HASHTAGS="$(limit_hashtags "$ALL_HASHTAGS" "$INSTAGRAM_HASHTAG_MAX")"
+INSTAGRAM_HASHTAGS="$(limit_hashtags "$(merge_hashtags "$INLINE_HASHTAGS" "$INSTAGRAM_HASHTAGS_BASE")" "$INSTAGRAM_HASHTAG_MAX")"
 
 BODY="$(compose_body "$ALL_HASHTAGS")"
 INSTAGRAM_TEXT="$(compose_body "$INSTAGRAM_HASHTAGS")"

@@ -63,16 +63,18 @@ From one `--description`:
 - **YouTube** — title is the first line, capped at 100 chars; description plus
   hashtags as the body. Category `Music`, public.
 - **Instagram** — description plus hashtags, posted as a Reel shared to feed.
-  Capped at **5 hashtags** (Buffer's limit for Reels) — the first 5 are kept in
-  order and the rest dropped.
+  Uses its own shorter tag set (`INSTAGRAM_HASHTAGS_BASE`) and is capped at
+  **5 hashtags** (Buffer's limit for Reels) — the first 5 are kept in order and
+  the rest dropped.
 - **TikTok** — description plus hashtags, capped at 2200 chars.
 
 If the description already ends with hashtags, they're moved into the tag block
 and merged with the defaults — first-seen order wins, duplicates are dropped
 case-insensitively, and a hashtag mid-sentence stays where it is.
 
-Hashtags, the category, and the Instagram tag limit live in a tunables block at
-the top of the script.
+Both hashtag sets (`HASHTAGS` for YouTube and TikTok, `INSTAGRAM_HASHTAGS_BASE`
+for Instagram), the category, and the Instagram tag limit live in a tunables
+block at the top of the script.
 
 ### Scheduling
 
