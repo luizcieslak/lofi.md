@@ -120,7 +120,7 @@ body::-webkit-scrollbar {
 
 	/* Vertical/horizontal padding as separate knobs. In px rather than em so they
 	   stay put when the title/artist sizes change. */
-	--meta-pad-y: 16px;
+	--meta-pad-y: 10px;
 	--meta-pad-x: 16px;
 
 	/* Floor for the block's width, so a short title doesn't collapse it into a
