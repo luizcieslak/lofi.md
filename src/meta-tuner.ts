@@ -1,11 +1,11 @@
-// Dev-only tuning panel for the #meta block: the four 3D transform knobs plus
-// its two edge offsets. Imported behind `import.meta.env.DEV` in main.ts, so it
-// is dropped entirely from production builds.
+// Dev-only tuning panel for the #meta block and backdrop. Imported behind
+// `import.meta.env.DEV` in main.ts, so it is dropped entirely from production
+// builds.
 //
-// Values are written as inline custom properties on #meta, which override the
-// stylesheet's defaults without touching it. `Copy CSS` emits the current set
-// ready to paste back into the #meta rule; `Reset` drops the overrides and
-// returns to whatever the stylesheet says.
+// Values are written as inline custom properties on either :root or #meta,
+// which override the stylesheet's defaults without touching it. `Copy CSS`
+// emits both rule sets; `Reset` drops the overrides and returns to whatever the
+// stylesheet says.
 
 type Knob = {
 	prop: string
@@ -14,9 +14,19 @@ type Knob = {
 	max: number
 	step: number
 	unit: string
+	target?: 'root'
 }
 
 const KNOBS: Knob[] = [
+	{
+		prop: '--backdrop-scrim-opacity',
+		label: 'scrim opacity',
+		min: 0,
+		max: 1,
+		step: 0.01,
+		unit: '',
+		target: 'root',
+	},
 	{ prop: '--meta-top', label: 'top', min: 0, max: 1200, step: 1, unit: 'px' },
 	{ prop: '--meta-right', label: 'right', min: 0, max: 1200, step: 1, unit: 'px' },
 	{ prop: '--meta-perspective', label: 'perspective', min: 120, max: 4000, step: 10, unit: 'px' },
@@ -37,6 +47,9 @@ const KNOBS: Knob[] = [
 const STORAGE_KEY = 'meta-tuner'
 
 export function mountMetaTuner(meta: HTMLElement) {
+	const targetFor = (knob: Knob) =>
+		knob.target === 'root' ? document.documentElement : meta
+
 	// Resolving against the computed style means the sliders open on the real
 	// current values — including the stylesheet's, on a first run with no saved
 	// overrides.
@@ -44,20 +57,20 @@ export function mountMetaTuner(meta: HTMLElement) {
 	// Custom properties resolve as raw tokens, not computed lengths: a value
 	// written in any unit other than the knob's own would come back as a bare
 	// number in the wrong scale (`2rem` → 2). Warn rather than silently mis-tune.
-	const read = (prop: string, unit?: string) => {
-		const raw = getComputedStyle(meta).getPropertyValue(prop).trim()
+	const read = (knob: Knob) => {
+		const raw = getComputedStyle(targetFor(knob)).getPropertyValue(knob.prop).trim()
 		const value = parseFloat(raw)
 		if (Number.isNaN(value)) return 0
-		if (unit && raw && !raw.endsWith(unit)) {
+		if (knob.unit && raw && !raw.endsWith(knob.unit)) {
 			console.warn(
-				`[meta-tuner] ${prop} is "${raw}", not ${unit} — the slider will rewrite it in ${unit}.`,
+				`[meta-tuner] ${knob.prop} is "${raw}", not ${knob.unit} — the slider will rewrite it in ${knob.unit}.`,
 			)
 		}
 		return value
 	}
 
 	const write = (knob: Knob, value: number) =>
-		meta.style.setProperty(knob.prop, `${value}${knob.unit}`)
+		targetFor(knob).style.setProperty(knob.prop, `${value}${knob.unit}`)
 
 	// Restore a previous session's tuning before the panel reads its values, so
 	// the sliders and the page agree on the starting point.
@@ -69,7 +82,7 @@ export function mountMetaTuner(meta: HTMLElement) {
 	}
 
 	const save = () => {
-		const current = Object.fromEntries(KNOBS.map(k => [k.prop, read(k.prop, k.unit)]))
+		const current = Object.fromEntries(KNOBS.map(k => [k.prop, read(k)]))
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(current))
 	}
 
@@ -141,7 +154,7 @@ export function mountMetaTuner(meta: HTMLElement) {
 		input.step = String(knob.step)
 
 		const refresh = () => {
-			const value = read(knob.prop, knob.unit)
+			const value = read(knob)
 			input.value = String(value)
 			out.textContent = `${knob.label}: ${value}${knob.unit}`
 		}
@@ -164,7 +177,15 @@ export function mountMetaTuner(meta: HTMLElement) {
 	const copy = document.createElement('button')
 	copy.textContent = 'Copy CSS'
 	copy.addEventListener('click', () => {
-		const css = KNOBS.map(k => `\t${k.prop}: ${read(k.prop, k.unit)}${k.unit};`).join('\n')
+		const rule = (selector: string, knobs: Knob[]) => {
+			const declarations = knobs
+				.map(k => `\t${k.prop}: ${read(k)}${k.unit};`)
+				.join('\n')
+			return `${selector} {\n${declarations}\n}`
+		}
+		const rootKnobs = KNOBS.filter(knob => knob.target === 'root')
+		const metaKnobs = KNOBS.filter(knob => knob.target !== 'root')
+		const css = [rule(':root', rootKnobs), rule('#meta', metaKnobs)].join('\n\n')
 		void navigator.clipboard.writeText(css)
 		console.log(css)
 		copy.textContent = 'Copied'
@@ -174,7 +195,7 @@ export function mountMetaTuner(meta: HTMLElement) {
 	const reset = document.createElement('button')
 	reset.textContent = 'Reset'
 	reset.addEventListener('click', () => {
-		for (const knob of KNOBS) meta.style.removeProperty(knob.prop)
+		for (const knob of KNOBS) targetFor(knob).style.removeProperty(knob.prop)
 		localStorage.removeItem(STORAGE_KEY)
 		for (const refresh of sync) refresh()
 	})

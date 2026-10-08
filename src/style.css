@@ -2,6 +2,7 @@
 	--edge: 36px;
 	--bg: #0b0b0d;
 	--fg: #f5f5f4;
+	--backdrop-scrim-opacity: 0.32;
 }
 
 * {
@@ -91,6 +92,7 @@ body::-webkit-scrollbar {
 	content: '';
 	position: fixed;
 	inset: 0;
+	opacity: var(--backdrop-scrim-opacity);
 	background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.15) 45%, rgba(0, 0, 0, 0.45));
 }
 
@@ -309,6 +311,18 @@ body[data-playing='false'] #toggle:focus-visible {
 }
 
 #audio {
+	display: none;
+}
+
+/* ?stream: broadcast capture. No cursor, no scrolling, and never the play
+   button or footer — even if the radio stalls, viewers see only the art. */
+body[data-stream='true'] {
+	overflow: hidden;
+	cursor: none;
+}
+
+body[data-stream='true'] #toggle,
+body[data-stream='true'] #footer {
 	display: none;
 }
 
