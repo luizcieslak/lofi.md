@@ -87,6 +87,19 @@ body::-webkit-scrollbar {
 	opacity: 1;
 }
 
+/* On a phone, `cover` shows only a narrow slice of the art. main.ts picks a
+   random horizontal offset per visit (--backdrop-x) so a different part of
+   the scene is in frame; the still and the video share it so the swap lines up. */
+@media (max-width: 640px) {
+	#backdrop {
+		background-position-x: var(--backdrop-x, center);
+	}
+
+	#backdrop-video {
+		object-position: var(--backdrop-x, center) center;
+	}
+}
+
 /* Keeps the overlaid text readable over bright artwork. */
 #backdrop::after {
 	content: '';
