@@ -71,6 +71,34 @@ void player.tryAutoplay().then(started => {
 	if (!started) document.body.dataset.needsGesture = 'true'
 })
 
+// The animated backdrop only runs alongside the music. Its src is attached on
+// the first play, so the initial load is just the still image; it's revealed
+// on the video's own `playing` event so there's never a blank frame, and it
+// fades back to the still whenever the stream stops.
+const backdropVideo = document.getElementById('backdrop-video') as HTMLVideoElement
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
+let backdropAnimated = false
+
+backdropVideo.addEventListener('playing', () => {
+	if (backdropAnimated) backdropVideo.dataset.visible = 'true'
+})
+
+function setBackdropAnimated(on: boolean) {
+	on &&= !reducedMotion.matches
+	if (on === backdropAnimated) return
+	backdropAnimated = on
+
+	if (on) {
+		if (!backdropVideo.getAttribute('src')) backdropVideo.src = '/lofimd.mp4'
+		// Muted, so this is allowed without a gesture. A rejection just means it
+		// was paused again before it started — the still stays up either way.
+		void backdropVideo.play().catch(() => {})
+	} else {
+		backdropVideo.dataset.visible = 'false'
+		backdropVideo.pause()
+	}
+}
+
 let currentCover = ''
 
 // The fullscreen backdrop is the fixed banner art (set in CSS); per-track art
@@ -106,4 +134,8 @@ player.subscribe(state => {
 	// While playing, the art stands alone — double-click is the control. When
 	// stopped, offer the button again so there's always an obvious way back in.
 	document.body.dataset.playing = state.wantPlaying ? 'true' : 'false'
+
+	// Follow the audio element, not the intent, so the art doesn't start moving
+	// while the stream is still buffering or reconnecting.
+	setBackdropAnimated(state.playing)
 })

@@ -68,6 +68,24 @@ body::-webkit-scrollbar {
 	background-repeat: no-repeat;
 }
 
+/* Animated loop of the same illustration. It sits over the still and fades in
+   only once it has frames to show, so the swap is seamless and the initial
+   load never pays for the video. */
+#backdrop-video {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+	opacity: 0;
+	transition: opacity 600ms ease;
+}
+
+#backdrop-video[data-visible='true'] {
+	opacity: 1;
+}
+
 /* Keeps the overlaid text readable over bright artwork. */
 #backdrop::after {
 	content: '';
@@ -296,6 +314,7 @@ body[data-playing='false'] #toggle:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
 	#backdrop,
+	#backdrop-video,
 	#meta,
 	#toggle {
 		transition: none;

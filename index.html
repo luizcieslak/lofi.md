@@ -9,8 +9,11 @@
 		<title>lofi.md</title>
 	</head>
 	<body>
-		<!-- Fullscreen art: the banner illustration fills the viewport. -->
-		<div id="backdrop" aria-hidden="true"></div>
+		<!-- Fullscreen art: the banner illustration fills the viewport. The animated
+		     loop is attached and faded in only once the radio is actually playing. -->
+		<div id="backdrop" aria-hidden="true">
+			<video id="backdrop-video" muted loop playsinline preload="none" poster="/lofimd.webp"></video>
+		</div>
 
 		<main id="stage">
 			<!-- Two rows of text + a 36x36 cover, 36px from the top and right edges. -->
