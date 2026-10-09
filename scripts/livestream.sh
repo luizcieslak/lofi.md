@@ -37,6 +37,11 @@ GOP=$((FPS * 2)) # keyframe every 2s — YouTube wants ≤ 4s
 
 EDGE=48 # gap between the card and the top/right edges, in px of the 1920x1080 frame
 
+# Backdrop scrim, mirroring #backdrop::after in src/style.css: a black gradient
+# at 55% → 15% (at 45% height) → 45%, times --backdrop-scrim-opacity. Keep these
+# in sync by hand. 0 turns it off.
+SCRIM_OPACITY=1
+
 # Now-playing card. CARD_SCALE is the device pixel ratio Chrome renders at: the
 # site's 14px type is tuned for a screen you sit in front of, and 2x reads well
 # in a small 1080p player, like the site on a Retina display.
@@ -324,6 +329,13 @@ if [ "$OVERLAY" = card ]; then
 fi
 
 VIDEO_FILTER="[0:v]fps=$FPS"
+if [ "$SCRIM_OPACITY" != 0 ]; then
+	# The gradient is computed once, on a single frame; overlay then reuses that
+	# frame for the whole stream, so the per-frame cost is just the blend.
+	scrim_alpha="255*$SCRIM_OPACITY*if(lt(Y/H\,0.45)\,0.55-0.40*Y/H/0.45\,0.15+0.30*(Y/H-0.45)/0.55)"
+	VIDEO_FILTER+="[base];color=c=black:s=1920x1080:d=1,format=rgba,geq=r=0:g=0:b=0:a=$scrim_alpha,trim=end_frame=1,format=yuva420p[scrim]"
+	VIDEO_FILTER+=";[base][scrim]overlay=eof_action=repeat:format=yuv420"
+fi
 if [ "$OVERLAY" = card ]; then
 	# Input 2 is the card PNG; image2 re-reads the file on every loop, so a
 	# renamed-in card shows up within half a second.
