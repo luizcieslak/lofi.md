@@ -88,7 +88,7 @@ const backdropVideo = document.getElementById('backdrop-video') as HTMLVideoElem
 // Each visit frames a different slice of the art on mobile. The offset only
 // takes effect inside the mobile media query in style.css; the video inherits
 // the variable from #backdrop.
-const BACKDROP_OFFSETS_EM = [9, 20, 34, 44, 56, 62]
+const BACKDROP_OFFSETS_EM = [9, 20, 34, 44]
 const offset = BACKDROP_OFFSETS_EM[Math.floor(Math.random() * BACKDROP_OFFSETS_EM.length)]
 document.getElementById('backdrop')!.style.setProperty('--backdrop-x', `-${offset}em`)
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
