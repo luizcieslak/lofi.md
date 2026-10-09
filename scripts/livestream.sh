@@ -28,9 +28,10 @@ VIDEO_FILE="$ROOT_DIR/public/lofimd.mp4"
 YOUTUBE_INGEST="rtmp://a.rtmp.youtube.com/live2"
 TWITCH_INGEST="rtmp://live.twitch.tv/app" # auto-routes to the nearest ingest
 
-# YouTube's recommendation for 1080p30 is 4.5–9 Mbps. The art is a slow loop,
-# so the low end looks fine and leaves headroom on a home upload.
-VIDEO_BITRATE="4500k"
+# A ceiling, not a target: 6 Mbps is Twitch's recommended max and inside
+# YouTube's 4.5–9 Mbps for 1080p30. VideoToolbox undershoots it on this mostly
+# still loop (~3 Mbps measured) because it doesn't need more.
+VIDEO_BITRATE="6000k"
 AUDIO_BITRATE="160k"
 FPS=30
 GOP=$((FPS * 2)) # keyframe every 2s — YouTube wants ≤ 4s
@@ -368,7 +369,10 @@ FFMPEG=(
 	${CARD_INPUT[@]+"${CARD_INPUT[@]}"} # bash 3.2-safe empty-array expansion
 	-filter_complex "$VIDEO_FILTER"
 	-map "[v]" -map 1:a:0
-	-c:v h264_videotoolbox -realtime 1 -b:v "$VIDEO_BITRATE" -maxrate "$VIDEO_BITRATE" -bufsize "$VIDEO_BITRATE"
+	# prio_speed 0: favour quality over speed — the hardware encoder has plenty of
+	# headroom at 1080p30. spatial_aq: spend bits on detail (the card) over flat wall.
+	-c:v h264_videotoolbox -realtime 1 -prio_speed 0 -spatial_aq 1
+	-b:v "$VIDEO_BITRATE" -maxrate "$VIDEO_BITRATE" -bufsize "$VIDEO_BITRATE"
 	-g "$GOP" -profile:v high
 	-c:a aac -b:a "$AUDIO_BITRATE" -ar 44100 -ac 2
 )
