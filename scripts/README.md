@@ -1,6 +1,95 @@
 # scripts
 
-Social-media posting for lofi.md.
+Social-media posting and livestreaming for lofi.md.
+
+## Livestreaming to YouTube
+
+Two ways to stream, both cheap enough for an M1 with 8GB. Both encode with Apple's
+hardware H.264 encoder, so the CPU barely notices.
+
+| | OBS + Browser Source | `livestream.sh` (ffmpeg) |
+| --- | --- | --- |
+| Looks like | Exactly the site: cover art, wall tilt, fades | Backdrop loop + the site's own now-playing card (no fades) |
+| Cost | OBS + a Chromium helper, ~0.6–1GB RAM | ~200MB RAM, ~20% of one core; a brief Chrome render per track |
+| Runs | GUI app | Terminal, unattended, can move to a server |
+
+### One-time YouTube setup
+
+1. YouTube Studio → **Create → Go live**. The first time, YouTube asks you to verify
+   the channel (phone), and live streaming can take **up to 24h** to unlock.
+2. Pick **Stream** (not Webcam), set the title, description, privacy (start with
+   **Unlisted**), category and thumbnail, and copy the **stream key**.
+
+Title, description, privacy, thumbnail, chat and so on all live on YouTube's
+side. Edit them in Studio at any time, even mid-stream. The encoder (OBS or
+ffmpeg) only sends audio and video to the stream key.
+
+### Option A: OBS
+
+1. `brew install --cask obs`
+2. **Settings → Video**: base and output 1920×1080, 30 fps.
+3. **Settings → Output** (Advanced): encoder *Apple VT H264 Hardware Encoder*,
+   rate control CBR, 4500 kbps, keyframe interval 2s. Audio: 160 kbps.
+4. **Settings → Stream**: service YouTube, paste the stream key.
+5. **Sources → + → Browser**: URL `https://<your deploy>/?stream` (or
+   `http://localhost:5173/?stream` with `pnpm dev` running), 1920×1080, FPS 30.
+   Check **Control audio via OBS**. Uncheck *Shutdown source when not visible*.
+6. **Start Streaming**.
+
+`?stream` hides the play button, footer and cursor, so the frame is only the
+art and the now-playing block. OBS's browser allows autoplay, so the radio starts
+on its own.
+
+### Option B: `livestream.sh`
+
+Put the stream key for the platform in `.env` (gitignored):
+
+```
+YOUTUBE_STREAM_KEY=xxxx-xxxx-xxxx-xxxx-xxxx
+TWITCH_STREAM_KEY=live_xxxxxxxx
+KICK_STREAM_URL=rtmps://xxxx.global-contribute.live-video.net:443/app/
+KICK_STREAM_KEY=sk_xxxxxxxx
+```
+
+```bash
+pnpm stream -- --output test.flv --duration 60   # record locally first
+pnpm stream                                      # go live on YouTube
+pnpm stream -- --platform twitch                 # …or Twitch
+pnpm stream -- --platform kick                   # …or Kick
+caffeinate -dimsu pnpm stream                    # go live, keep the Mac awake
+```
+
+Twitch and Kick have no 24h wait, so use them to test while YouTube unlocks.
+For a private dry run on Twitch, set the key to `live_xxxxxxxx?bandwidthtest=true`.
+Twitch accepts the stream and shows its health in Stream Manager, but the
+channel never goes live.
+
+It loops `public/lofimd.mp4`, pulls the radio audio from `VITE_RADIO_API_URL`, and
+checks `/now-playing` every 3s. When the track changes, headless Chrome screenshots
+[`stream-meta.html`](stream-meta.html), which is the site's `#meta` card styled by
+`src/style.css` itself, to a transparent PNG that ffmpeg overlays. A new title shows
+up 0–5s after the song changes. Without Google Chrome it falls back to plain ffmpeg
+text. It registers as one listener
+(heartbeat every 60s, `end` on exit), like a browser tab. When live, it restarts
+ffmpeg if it dies.
+
+| Flag                   | Effect                                            |
+| ---------------------- | ------------------------------------------------- |
+| `--platform <name>`    | `youtube` (default), `twitch` or `kick`           |
+| `--output <file>`      | Record locally instead of going live              |
+| `--duration <seconds>` | Stop after this long                              |
+| `--no-text`            | No now-playing card                               |
+| `--dry-run`            | Print the ffmpeg command (key redacted) and exit  |
+
+Bitrate, card scale (`CARD_SCALE`, default 2x) and placement live in the tunables
+block at the top of the script.
+
+### Things to know
+
+- **Music rights.** Every track on the radio must be cleared for YouTube, or
+  Content ID can mute the stream or strike the channel.
+- **Sleep.** A sleeping Mac ends the stream. Use `caffeinate` and keep it plugged in.
+- **Upload.** 4.5 Mbps video plus 160 kbps audio needs about 6 Mbps of steady upload.
 
 ## post-video.sh
 

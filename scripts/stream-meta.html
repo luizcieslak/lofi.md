@@ -1,0 +1,49 @@
+<!doctype html>
+<!--
+	The #meta now-playing card, alone on a transparent page, for livestream.sh.
+
+	The script screenshots this with headless Chrome whenever the track changes
+	and overlays the PNG on the stream. It loads the site's own stylesheet and
+	reuses its element ids, so the card on stream is the card on the site: same
+	type, scrim, cover art and wall tilt, and it follows any change to
+	src/style.css.
+
+	Track info arrives in the query string: ?title=…&artist=…&cover=…
+-->
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="stylesheet" href="../src/style.css" />
+		<style>
+			/* Only the card: no page colour, and pinned near the top-right corner
+			   with room left for its text-shadow. livestream.sh places the image. */
+			html,
+			body {
+				background: transparent !important;
+			}
+
+			#meta {
+				--meta-top: 16px;
+				--meta-right: 16px;
+				transition: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="meta" data-loaded="true">
+			<div id="text">
+				<p id="title"></p>
+				<p id="artist"></p>
+			</div>
+			<img id="cover" alt="" width="36" height="36" />
+		</div>
+		<script>
+			const params = new URLSearchParams(location.search)
+			document.getElementById('title').textContent = params.get('title') || ''
+			document.getElementById('artist').textContent = params.get('artist') || ''
+			const cover = params.get('cover')
+			if (cover) document.getElementById('cover').src = cover
+			else document.getElementById('cover').remove()
+		</script>
+	</body>
+</html>

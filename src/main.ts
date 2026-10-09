@@ -36,6 +36,14 @@ document.addEventListener('keydown', event => {
 	player.toggle()
 })
 
+// Broadcast mode for a livestream capture (an OBS Browser Source). Loading the
+// page with ?stream hides every control and the footer, so the frame is only the
+// art, the now-playing block and the audio. OBS's browser allows unmuted
+// autoplay, so tryAutoplay() below starts the radio without a gesture.
+if (new URLSearchParams(location.search).has('stream')) {
+	document.body.dataset.stream = 'true'
+}
+
 // Tuning panel for the #meta wall tilt.
 //
 // Always available in dev. In a production build it ships only when built with
