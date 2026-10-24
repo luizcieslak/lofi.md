@@ -104,35 +104,34 @@ pnpm post -- \
 
 ### Setup
 
-Install the [Buffer CLI](https://buffer.com) and `jq`, then authenticate once:
+Install the [Buffer CLI](https://buffer.com) and `jq`. This repo has its own Buffer
+profile in `.buffer/config.json` (gitignored), so it can post as the lofi.md
+account while other projects on this machine keep using `~/.config/buffer`. The
+CLI resolves flag → env → repo `.buffer/config.json` → global, and the scripts
+always call it from the repo root.
 
-```bash
-buffer init
-```
-
-That stores your API key in `~/.config/buffer/config.json` — outside this repo.
-The script never reads or embeds it.
-
-Then put your channel IDs in `.env` (gitignored, never committed):
-
-```bash
-buffer channels list --fields id,name,service --output json
-```
-
-Copy each `id` into the matching variable in `.env`:
+1. In Buffer, logged in as the lofi.md account: **Settings → API**, create a key.
+2. In `.env`, set `BUFFER_API_KEY` (and `BUFFER_TIMEZONE`, default
+   `America/Sao_Paulo`).
+3. `pnpm buffer:setup` lists the organizations for that key. Copy the lofi.md one
+   into `BUFFER_ORGANIZATION_ID`, then run `pnpm buffer:setup` again. It writes
+   `.buffer/config.json` (mode 600) and prints the channels.
+4. Copy each channel `id` into `.env`:
 
 ```
-BUFFER_ORGANIZATION_ID=
 BUFFER_YOUTUBE_CHANNEL_ID=
 BUFFER_TIKTOK_CHANNEL_ID=
 BUFFER_INSTAGRAM_CHANNEL_ID=
 ```
 
+The setup script prints where each setting comes from, never its value.
+
 ### Hosting the video
 
 Buffer's API takes videos as public HTTPS URLs and the CLI has no upload command,
 so upload the `.mp4` somewhere public first and pass the URL. The script rejects
-local paths rather than failing halfway through.
+local paths rather than failing halfway through. The scheduler (below) uploads to
+R2 for you.
 
 ### Options
 
@@ -144,45 +143,14 @@ local paths rather than failing halfway through.
 | `--only <list>`       | Subset, e.g. `--only tiktok,instagram`              |
 | `--draft`             | Save as drafts; nothing publishes                   |
 | `--dry-run`           | Validate payloads, make no API calls                |
-| `--latest`            | Batch mode: queue the next videos from R2 (below)   |
-| `--limit <n>`         | Batch size for `--latest` (default 10)              |
-| `--folder <name>`     | Use this R2 folder instead of the newest one        |
+| `--due-at <iso>`      | Publish at this time instead of the next queue slot |
+| `--report json`       | One JSON line per created post on stdout            |
+| `--latest`            | Schedule the next batch (see the scheduler below)   |
+| `--batch <id>`        | Schedule this batch instead                         |
+| `--limit <n>`         | Videos to fill an empty batch with (default 10)     |
+| `--folder <name>`     | Fill an empty batch from this recordings folder     |
 
 `<br>` in a description becomes a line break.
-
-### Batch: the newest R2 folder
-
-```bash
-pnpm post -- --latest --dry-run   # preview the next 10 captions and payloads
-pnpm post -- --latest             # queue them
-```
-
-`--latest` lists `album-covers/lofi.md/` in R2 and picks the newest
-`YYYY-MM-DDTHH-MM-SS/` folder. Videos there are named
-`<kebab-case name>-<uuid>-1080x1920.mp4`. The name is the track title
-(`the-works`), artist + title (`quetzal-fig-pulp`), or the source file name. The
-script matches each file to `/api/tracks` on the radio API and captions it:
-
-```
-{title} by {artist} {@handles}<br><br><br>{extra}
-```
-
-Title and artist casing comes from the radio API. A file with no match falls back
-to its lowercase file name. Three files hold the rest:
-
-- [`instagram-handles.json`](instagram-handles.json): lowercase artist → handles.
-  Artists like `dEnk, Drumtomski` are split, and each one's handles are looked up.
-  Add new artists here, and future runs pick them up.
-- [`post-queue.json`](post-queue.json): posting order, plus optional `extra`
-  text (and `title`/`artist` overrides) keyed by the kebab-case file name. Videos
-  missing from the queue go last, alphabetically.
-- [`posted-videos.json`](posted-videos.json): videos already queued (not drafts
-  or dry runs), so the next run continues with the next batch.
-
-R2 listing uses the Cloudflare API with `CLOUDFLARE_API_TOKEN` and
-`CLOUDFLARE_ACCOUNT_ID` from `.env`. Without them, it falls back to the
-`npx wrangler login` session. The batch stops at the first failed video and
-doesn't mark that video as posted.
 
 ### What gets derived
 
@@ -206,14 +174,13 @@ block at the top of the script.
 
 ### Scheduling
 
-Posts go in with `addToQueue`, so Buffer places each one in that channel's next
-configured slot — the power hours already set up per channel.
+Without `--due-at`, posts go in with `addToQueue`, so Buffer places each one in
+that channel's next configured slot: the power hours set up per channel. The
+three schedules have different empty days (TikTok has no wed/thu, YouTube no
+mon/wed), so queued posts can land on different days.
 
-Because the three schedules have different empty days (TikTok has no wed/thu,
-YouTube no mon/wed), the posts often land on different **days**, not just
-different hours. A Wednesday run might queue Instagram for Wed evening but TikTok
-for Friday. That's queue mode working as intended — to tighten it, fill the gaps
-in the Buffer posting schedules rather than changing the script.
+With `--due-at` (which the scheduler always passes), every network gets
+`customScheduled` at that exact time.
 
 ### If a post fails
 
@@ -230,3 +197,87 @@ buffer posts list --organization-id "$BUFFER_ORGANIZATION_ID" \
 
 buffer posts delete --id <id>   # remove one
 ```
+
+## The scheduler: batches of 10, one post a day
+
+Renders start out on local disk, in `RECORDINGS_DIR` (default
+`/home/luiz/oss/lofi-radio/recordings`): new ones at the root, archived ones in
+`backup/<YYYY-MM-DD[THH-MM-SS]>/`. A **batch** is up to 10 of them, posted one a
+day from its start date at `postTime` (18:00 by default, in the Buffer
+timezone). Batches follow each other in 10-day windows. 10 matches the Buffer
+plan's queue limit.
+
+There are two ways to drive it, and both read and write the same files.
+
+### In the browser
+
+```bash
+pnpm dev     # then open http://localhost:5173/posts.html
+```
+
+- **Videos** (left): every render, grouped by folder. The newest folder dated
+  today or earlier is opened by default. Each one is matched to `/api/tracks` on
+  the radio API for title, artist and cover art.
+- **Batches**: the next one is pinned on top as *Next up*. Drag videos from the
+  list into a batch, between days, between batches, or back to the list to
+  remove them. *+ Add batch* opens the next 10-day window, and *Starts* moves one.
+- Click a video for its details: preview, title and artist overrides (for files
+  without a radio match), the custom text, the caption, and *Preview payloads*,
+  which runs `post-video.sh --dry-run` for the exact payloads.
+- **Handles**: every artist on the radio and their Instagram handles. Artists in
+  upcoming batches without a handle are flagged.
+- **Save** (or ⌘S / Ctrl+S) writes the files. A save fails if a run or the
+  terminal changed them since the page loaded.
+- **Dry run**, **Save as drafts** and **Schedule** run the scheduler and stream
+  its output: progress per video, the full CLI log, and links to the video on
+  the CDN and the Buffer channel.
+
+The page only exists in `pnpm dev`. `pnpm build` ships just the radio.
+
+### In the terminal
+
+```bash
+pnpm schedule -- videos                  # renders, matched to radio tracks
+pnpm schedule -- batches                 # every batch, its days and status
+pnpm schedule -- new-batch [--start 2026-11-03]
+pnpm schedule -- add <file…> [--batch <id>]
+pnpm schedule -- move <file> --batch <id> [--index 3]
+pnpm schedule -- extra <file> "great beat, smoother bassline"
+pnpm schedule -- handle "jinsang" @jinsangbeats
+pnpm schedule -- run next --dry-run      # validate the next batch
+pnpm schedule -- run next                # upload and schedule it
+pnpm post -- --latest                    # same as `run next`
+```
+
+Files are relative to the recordings folder, as `videos` prints them. If `run`
+finds the next batch empty, it fills it with the next 10 unused videos from the
+newest folder (`--folder` and `--limit` change that).
+
+### What a run does
+
+For each video in the batch:
+
+1. **Upload to R2** with `wrangler r2 object put` into
+   `album-covers/lofi.md/<folder>/<file>`, served at `https://cdn.cieslak.dev/…`.
+   Renders still at the recordings root go under the upload day. If the CDN
+   already has the file, the upload is skipped. Wrangler uses the
+   `npx wrangler login` session, or `CLOUDFLARE_API_TOKEN` and
+   `CLOUDFLARE_ACCOUNT_ID` from `.env`.
+2. **Caption** it as `{title} by {artist} {@handles}<br><br><br>{custom text}`.
+3. **Call `post-video.sh`** with `--due-at` for that day, then record each post id
+   in `schedule.json`.
+
+It saves after every video and keeps going past a failure, leaving the batch
+*partial*. A re-run only posts the networks that have no post id yet, so it
+never duplicates one. It refuses to start if any post would be due in the past.
+Only one run can happen at a time, across the terminal and the browser.
+
+### The files
+
+- [`schedule.json`](schedule.json): settings and batches. Each item has its file,
+  custom text, overrides, R2 key and URL, Buffer post ids, and last error.
+  Status (*draft*, *partial*, *scheduled*) is derived from the post ids.
+  The first batch came from the old `posted-videos.json`, queued with
+  `addToQueue` before post ids were recorded.
+- [`instagram-handles.json`](instagram-handles.json): lowercase artist → handles.
+  Credits like `dEnk, Drumtomski` are split, and each artist's handles are added.

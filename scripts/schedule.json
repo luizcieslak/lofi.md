@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "settings": {
+    "postTime": "18:00",
+    "timeZone": "America/Sao_Paulo",
+    "windowDays": 10,
+    "batchSize": 10
+  },
+  "batches": [
+    {
+      "id": "2026-10-09",
+      "start": "2026-10-09",
+      "status": "scheduled",
+      "note": "Queued by the old --latest flow (addToQueue), before post ids were recorded.",
+      "imported": true,
+      "items": [
+        {
+          "file": "backup/2026-10-09T19-18-00/on-the-atlas-60e64af8-8d1a-4815-b6d2-fed3b3dcf826-1080x1920.mp4",
+          "extra": "",
+          "title": null,
+          "artist": null,
+          "r2Key": "lofi.md/2026-10-09T19-18-00/on-the-atlas-60e64af8-8d1a-4815-b6d2-fed3b3dcf826-1080x1920.mp4",
+          "url": "https://cdn.cieslak.dev/lofi.md/2026-10-09T19-18-00/on-the-atlas-60e64af8-8d1a-4815-b6d2-fed3b3dcf826-1080x1920.mp4",
+          "posts": {},
+          "error": null
+        },
+        {
+          "file": "backup/2026-10-09T19-18-00/novel-d3da96a3-df0c-4ce6-99af-81740cad2053-1080x1920.mp4",
+          "extra": "",
+          "title": null,
+          "artist": null,
+          "r2Key": "lofi.md/2026-10-09T19-18-00/novel-d3da96a3-df0c-4ce6-99af-81740cad2053-1080x1920.mp4",
+          "url": "https://cdn.cieslak.dev/lofi.md/2026-10-09T19-18-00/novel-d3da96a3-df0c-4ce6-99af-81740cad2053-1080x1920.mp4",
+          "posts": {},
+          "error": null
+        },
+        {
+          "file": "backup/2026-10-09T19-18-00/the-works-8a0651ba-a6ed-41eb-90d9-1e3154ae7a9d-1080x1920.mp4",
+          "extra": "great beat, smoother bassline",
+          "title": null,
+          "artist": null,
+          "r2Key": "lofi.md/2026-10-09T19-18-00/the-works-8a0651ba-a6ed-41eb-90d9-1e3154ae7a9d-1080x1920.mp4",
+          "url": "https://cdn.cieslak.dev/lofi.md/2026-10-09T19-18-00/the-works-8a0651ba-a6ed-41eb-90d9-1e3154ae7a9d-1080x1920.mp4",
+          "posts": {},
+          "error": null
+        },
+        {
+          "file": "backup/2026-10-09T19-18-00/riding-bikes-b26062cf-3a98-4649-aa1c-3da7fae5e901-1080x1920.mp4",
+          "extra": "",
+          "title": null,
+          "artist": null,
+          "r2Key": "lofi.md/2026-10-09T19-18-00/riding-bikes-b26062cf-3a98-4649-aa1c-3da7fae5e901-1080x1920.mp4",
+          "url": "https://cdn.cieslak.dev/lofi.md/2026-10-09T19-18-00/riding-bikes-b26062cf-3a98-4649-aa1c-3da7fae5e901-1080x1920.mp4",
+          "posts": {},
+          "error": null
+        },
+        {
+          "file": "backup/2026-10-09T19-18-00/quetzal-fig-pulp-106cc240-1467-427e-8571-ac5841be332e-1080x1920.mp4",
+          "extra": "also known as Al Quetz",
+          "title": null,
+          "artist": null,
+          "r2Key": "lofi.md/2026-10-09T19-18-00/quetzal-fig-pulp-106cc240-1467-427e-8571-ac5841be332e-1080x1920.mp4",
+          "url": "https://cdn.cieslak.dev/lofi.md/2026-10-09T19-18-00/quetzal-fig-pulp-106cc240-1467-427e-8571-ac5841be332e-1080x1920.mp4",
+          "posts": {},
+          "error": null
+        },
+        {
+          "file": "backup/2026-10-09T19-18-00/the-deli-sunflowers-4b455d01-7993-4d0c-ab1b-d7babb31e174-1080x1920.mp4",
+          "extra": "",
+          "title": null,
+          "artist": null,
+          "r2Key": "lofi.md/2026-10-09T19-18-00/the-deli-sunflowers-4b455d01-7993-4d0c-ab1b-d7babb31e174-1080x1920.mp4",
+          "url": "https://cdn.cieslak.dev/lofi.md/2026-10-09T19-18-00/the-deli-sunflowers-4b455d01-7993-4d0c-ab1b-d7babb31e174-1080x1920.mp4",
+          "posts": {},
+          "error": null
+        },
+        {
+          "file": "backup/2026-10-09T19-18-00/dirty-notes-b1ce4d31-a352-4f2a-a505-8bfea8cb6145-1080x1920.mp4",
+          "extra": "",
+          "title": null,
+          "artist": null,
+          "r2Key": "lofi.md/2026-10-09T19-18-00/dirty-notes-b1ce4d31-a352-4f2a-a505-8bfea8cb6145-1080x1920.mp4",
+          "url": "https://cdn.cieslak.dev/lofi.md/2026-10-09T19-18-00/dirty-notes-b1ce4d31-a352-4f2a-a505-8bfea8cb6145-1080x1920.mp4",
+          "posts": {},
+          "error": null
+        },
+        {
+          "file": "backup/2026-10-09T19-18-00/vanilla-think-360c1577-d1e1-4453-9b8a-33643c26ab76-1080x1920.mp4",
+          "extra": "",
+          "title": null,
+          "artist": null,
+          "r2Key": "lofi.md/2026-10-09T19-18-00/vanilla-think-360c1577-d1e1-4453-9b8a-33643c26ab76-1080x1920.mp4",
+          "url": "https://cdn.cieslak.dev/lofi.md/2026-10-09T19-18-00/vanilla-think-360c1577-d1e1-4453-9b8a-33643c26ab76-1080x1920.mp4",
+          "posts": {},
+          "error": null
+        },
+        {
+          "file": "backup/2026-10-09T19-18-00/vanilla-never-forget-c97c884a-5dd5-4ae1-bb45-78e3d1ec1835-1080x1920.mp4",
+          "extra": "",
+          "title": null,
+          "artist": null,
+          "r2Key": "lofi.md/2026-10-09T19-18-00/vanilla-never-forget-c97c884a-5dd5-4ae1-bb45-78e3d1ec1835-1080x1920.mp4",
+          "url": "https://cdn.cieslak.dev/lofi.md/2026-10-09T19-18-00/vanilla-never-forget-c97c884a-5dd5-4ae1-bb45-78e3d1ec1835-1080x1920.mp4",
+          "posts": {},
+          "error": null
+        },
+        {
+          "file": "backup/2026-10-09T19-18-00/high-john-ff8e82d1-2efa-461d-9e04-6ac832d4a3cb-1080x1920.mp4",
+          "extra": "the one and only. all caps.",
+          "title": null,
+          "artist": null,
+          "r2Key": "lofi.md/2026-10-09T19-18-00/high-john-ff8e82d1-2efa-461d-9e04-6ac832d4a3cb-1080x1920.mp4",
+          "url": "https://cdn.cieslak.dev/lofi.md/2026-10-09T19-18-00/high-john-ff8e82d1-2efa-461d-9e04-6ac832d4a3cb-1080x1920.mp4",
+          "posts": {},
+          "error": null
+        }
+      ]
+    }
+  ]
+}
