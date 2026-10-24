@@ -24,8 +24,8 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # TikTok and YouTube Shorts share the long set; Instagram gets its own, because
 # Buffer keeps only the first 5 tags on a Reel and these are the 5 worth keeping.
-HASHTAGS="#lofi #lowfi #chill #music #catjam #lofihiphop #studymusic #lofiradio #codingmusic"
-INSTAGRAM_HASHTAGS_BASE="#lofi #chill #lofihiphop #studymusic"
+HASHTAGS="#lofi #lowfi #chill #music #catjam #lofihiphop #studymusic #lofiradio #codingmusic #boombap"
+INSTAGRAM_HASHTAGS_BASE="#lofi #chill #boombap #studymusic"
 
 YOUTUBE_CATEGORY_ID="10" # Music
 YOUTUBE_PRIVACY="public"
