@@ -41,12 +41,16 @@ export interface Batch {
 	items: BatchItem[]
 }
 
+export type Theme = 'light' | 'dark'
+
 export interface ScheduleSettings {
 	/** HH:MM, local to timeZone. */
 	postTime: string
 	timeZone: string
 	windowDays: number
 	batchSize: number
+	/** Theme of the last post before the alternation started; the next one is the other. */
+	themeBefore: Theme
 }
 
 export interface Schedule {
@@ -72,6 +76,7 @@ export interface Video {
 	file: string
 	name: string
 	slug: string
+	theme: Theme
 	size: number
 	mtimeMs: number
 }

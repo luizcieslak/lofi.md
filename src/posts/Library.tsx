@@ -2,7 +2,7 @@ import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { useState } from 'react'
 import type { Catalog, CatalogVideo } from '../../scripts/lib/catalog.ts'
 import type { Schedule } from '../../scripts/lib/types.ts'
-import { Art, Chip, formatDate } from './ui.tsx'
+import { Art, Chip, ThemeSwatch, formatDate } from './ui.tsx'
 
 interface Props {
 	catalog: Catalog
@@ -123,6 +123,7 @@ function LibraryRow({
 				<span className="row-sub">{video.track?.artist ?? video.name}</span>
 			</span>
 			<span className="row-chips">
+				<ThemeSwatch theme={video.theme} />
 				{!video.track && <Chip tone="warn">no match</Chip>}
 				{batchId && <Chip tone={locked ? 'ok' : 'muted'}>{locked ? 'posted' : formatDate(batchId.slice(0, 10))}</Chip>}
 			</span>

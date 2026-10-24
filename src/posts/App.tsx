@@ -12,6 +12,8 @@ import type { CollisionDetection, DragEndEvent, DragStartEvent } from '@dnd-kit/
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { nextBatch, sortBatches } from '../../scripts/lib/batches.ts'
+import { nextThemeFor, themeOf, themeProblems, themeSequence } from '../../scripts/lib/theme.ts'
+import type { Schedule } from '../../scripts/lib/types.ts'
 import { SERVICES } from '../../scripts/lib/types.ts'
 import { ApiError, api, streamRun } from './api.ts'
 import { BatchCard } from './BatchCard.tsx'
@@ -21,7 +23,7 @@ import { Library } from './Library.tsx'
 import { applyEvent, startRun } from './RunPanel.tsx'
 import type { RunMode, RunState } from './RunPanel.tsx'
 import { initialState, reducer, videoIndex } from './store.ts'
-import { Art, SERVICE_LABEL, viewItem } from './ui.tsx'
+import { Art, SERVICE_LABEL, ThemeSwatch, viewItem } from './ui.tsx'
 
 // Drop targets: a batch item (insert before it), a batch (append) or the library (remove).
 type DropTarget = { kind: 'item'; batchId: string; index: number } | { kind: 'batch'; batchId: string } | { kind: 'library' }
@@ -49,6 +51,15 @@ const collision: CollisionDetection = (args) => {
 
 function today(timeZone: string): string {
 	return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
+}
+
+/** Why a batch can't be scheduled because of the light/dark sequence, or null. */
+function themeBlockFor(schedule: Schedule, batchId: string): string | null {
+	const problems = themeProblems(schedule, batchId)
+	if (problems.length === 0) return null
+	const first = problems[0]
+	const where = first.batchId === batchId ? `Day ${first.index + 1}` : `Batch ${first.batchId}, day ${first.index + 1},`
+	return `Light and dark must alternate: ${where} is ${first.theme} but needs ${first.expected}.`
 }
 
 function errorText(error: unknown): string {
@@ -182,6 +193,7 @@ export function App() {
 		...batches.filter((b) => b.status === 'scheduled').reverse(),
 	]
 	const dirty = state.scheduleDirty || state.handlesDirty
+	const expected = new Map(themeSequence(schedule).map((slot) => [slot.file, slot.expected]))
 	const anyRunning = config.running || Object.values(runs).some((r) => r.running)
 	const missingChannels = SERVICES.filter((s) => !config.channels[s])
 	const canRun = anyRunning
@@ -271,8 +283,18 @@ export function App() {
 							<header className="pane-head">
 								<h2>Batches</h2>
 								<span className="muted">
-									{schedule.settings.batchSize} posts, one a day at {schedule.settings.postTime} {schedule.settings.timeZone}
+									{schedule.settings.batchSize} posts, one a day at {schedule.settings.postTime} {schedule.settings.timeZone}, light and dark alternating
 								</span>
+								<label className="field-inline" title="Theme of the last post before the alternation started">
+									<span>Post before</span>
+									<select
+										value={schedule.settings.themeBefore}
+										onChange={(e) => dispatch({ type: 'themeBefore', theme: e.target.value === 'dark' ? 'dark' : 'light' })}
+									>
+										<option value="light">light</option>
+										<option value="dark">dark</option>
+									</select>
+								</label>
 								<button type="button" className="btn" onClick={() => dispatch({ type: 'addBatch', today: today(schedule.settings.timeZone) })}>
 									+ Add batch
 								</button>
@@ -289,6 +311,9 @@ export function App() {
 									selected={state.selected}
 									run={runs[batch.id] ?? null}
 									canRun={canRun}
+									expected={expected}
+									nextTheme={nextThemeFor(schedule, batch.id)}
+									themeBlock={themeBlockFor(schedule, batch.id)}
 									onSelect={(file) => dispatch({ type: 'select', file })}
 									onEdit={(patch) => dispatch({ type: 'editBatch', id: batch.id, patch })}
 									onRemove={() => dispatch({ type: 'removeBatch', id: batch.id })}
@@ -307,6 +332,7 @@ export function App() {
 									</span>
 									<span className="row-sub">{draggingVideo?.track?.artist ?? ''}</span>
 								</span>
+								<ThemeSwatch theme={themeOf(dragging)} label />
 							</div>
 						)}
 					</DragOverlay>

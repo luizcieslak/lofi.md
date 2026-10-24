@@ -247,6 +247,7 @@ pnpm schedule -- add <file…> [--batch <id>]
 pnpm schedule -- move <file> --batch <id> [--index 3]
 pnpm schedule -- extra <file> "great beat, smoother bassline"
 pnpm schedule -- handle "jinsang" @jinsangbeats
+pnpm schedule -- theme-before light      # theme of the post before the first batch
 pnpm schedule -- run next --dry-run      # validate the next batch
 pnpm schedule -- run next                # upload and schedule it
 pnpm post -- --latest                    # same as `run next`
@@ -255,6 +256,25 @@ pnpm post -- --latest                    # same as `run next`
 Files are relative to the recordings folder, as `videos` prints them. If `run`
 finds the next batch empty, it fills it with the next 10 unused videos from the
 newest folder (`--folder` and `--limit` change that).
+
+### Light and dark alternate
+
+Renders are named `<slug>-<uuid>-<theme>-1080x1920.mp4`, where the theme is
+`light` or `dark`. `default`, or no theme at all (older renders), counts as light.
+Posts always alternate between the two, across batches too. The last post before
+this rule was light, so the sequence starts with dark. `settings.themeBefore` in
+`schedule.json` records that ("Post before" in the page,
+`pnpm schedule -- theme-before light|dark` in the terminal).
+
+- The page shows each video's theme as a dot (filled for light, ringed for dark),
+  shows the theme every empty day needs, and flags a video that breaks the
+  sequence with "needs dark" or "needs light".
+- You can still drag freely and save, because a reorder breaks the sequence until
+  it's done. But *Save as drafts* and *Schedule* stay off, and `run` refuses
+  (`--dry-run` only warns), while anything up to and including that batch is out
+  of sequence.
+- `run` filling an empty batch picks the theme each day needs. It stops early
+  rather than put two of a kind in a row.
 
 ### What a run does
 

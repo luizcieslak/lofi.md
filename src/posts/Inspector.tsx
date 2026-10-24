@@ -4,7 +4,8 @@ import type { CatalogVideo } from '../../scripts/lib/catalog.ts'
 import { SERVICES } from '../../scripts/lib/types.ts'
 import type { Batch, BatchItem, Handles, ScheduleSettings, Service } from '../../scripts/lib/types.ts'
 import { api, bufferChannelUrl, previewUrl } from './api.ts'
-import { Chip, SERVICE_LABEL, viewItem } from './ui.tsx'
+import { themeOf } from '../../scripts/lib/theme.ts'
+import { Chip, SERVICE_LABEL, ThemeSwatch, viewItem } from './ui.tsx'
 
 interface Props {
 	file: string
@@ -63,6 +64,10 @@ export function Inspector({ file, video, batch, index, item, settings, handles, 
 				<dl className="facts">
 					<dt>File</dt>
 					<dd className="mono">{file}</dd>
+					<dt>Theme</dt>
+					<dd>
+						<ThemeSwatch theme={themeOf(file)} label />
+					</dd>
 					{video?.track && (
 						<>
 							<dt>Radio</dt>

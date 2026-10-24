@@ -8,6 +8,8 @@ export const DEFAULT_SETTINGS: ScheduleSettings = {
 	timeZone: 'America/Sao_Paulo',
 	windowDays: 10,
 	batchSize: 10,
+	// The last video posted before light/dark alternation was light.
+	themeBefore: 'light',
 }
 
 /** YYYY-MM-DD + n days, calendar arithmetic only. */
@@ -114,6 +116,8 @@ export function validateSchedule(value: unknown): string | null {
 	if (!isRecord(settings) || typeof settings.postTime !== 'string' || !/^\d{2}:\d{2}$/.test(settings.postTime))
 		return 'settings.postTime must be HH:MM'
 	if (typeof settings.timeZone !== 'string') return 'settings.timeZone must be a string'
+	if (settings.themeBefore !== undefined && settings.themeBefore !== 'light' && settings.themeBefore !== 'dark')
+		return 'settings.themeBefore must be light or dark'
 	if (!Array.isArray(value.batches)) return 'batches must be an array'
 	const ids = new Set<string>()
 	const files = new Set<string>()

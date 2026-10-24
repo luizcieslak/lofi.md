@@ -1,13 +1,14 @@
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { RECORDINGS_DIR, today } from './env.ts'
+import { themeOf } from './theme.ts'
 import type { Video, VideoGroup } from './types.ts'
 
 const VIDEO_EXT = /\.(mp4|mov|webm)$/i
 // Archived renders live in backup/YYYY-MM-DD or backup/YYYY-MM-DDTHH-MM-SS.
 const FOLDER_DATE = /^(\d{4}-\d{2}-\d{2})(T\d{2}-\d{2}-\d{2})?$/
-// Renders are named <track-slug>-<scene-uuid>-<width>x<height>.mp4.
-const RENDER_SUFFIX = /-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(-\d+x\d+)?$/
+// Renders are named <track-slug>-<scene-uuid>[-<light|dark|default>]-<width>x<height>.mp4.
+const RENDER_SUFFIX = /-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(-(light|dark|default))?(-\d+x\d+)?$/
 
 export function slugOf(file: string): string {
 	return basename(file)
@@ -24,6 +25,7 @@ function readVideos(dir: string, prefix: string): Video[] {
 				file: prefix ? `${prefix}/${entry.name}` : entry.name,
 				name: entry.name,
 				slug: slugOf(entry.name),
+				theme: themeOf(entry.name),
 				size: stat.size,
 				mtimeMs: stat.mtimeMs,
 			}

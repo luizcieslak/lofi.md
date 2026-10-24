@@ -8,6 +8,7 @@ import { POST_VIDEO, ROOT_DIR, SCRIPTS_DIR, today } from './env.ts'
 import { existsRemote, publicUrl, r2KeyFor, uploadToR2 } from './r2.ts'
 import { absolutePath, defaultGroup, findGroup } from './recordings.ts'
 import { loadHandles, loadSchedule, saveSchedule } from './store.ts'
+import { describeProblem, nextThemeFor, otherTheme, themeProblems } from './theme.ts'
 import { SERVICES, isService } from './types.ts'
 import type { Batch, PostRecord, RunEvent, Schedule, Service } from './types.ts'
 
@@ -133,13 +134,25 @@ async function resolveBatch(schedule: Schedule, options: RunOptions, emit: (e: R
 		if (!group) throw new Error(options.folder ? `no recordings folder "${options.folder}"` : 'no recordings found')
 		const used = usedFiles(schedule)
 		const limit = options.limit ?? schedule.settings.batchSize
-		const picked = group.videos.filter((video) => !used.has(video.file)).slice(0, limit)
-		if (picked.length === 0) throw new Error(`every video in ${group.label} is already in a batch`)
+		const unused = group.videos.filter((video) => !used.has(video.file))
+		if (unused.length === 0) throw new Error(`every video in ${group.label} is already in a batch`)
+		// Take videos in order, but always the theme the sequence needs next; stop
+		// when the folder runs out of it rather than post two of a kind in a row.
+		const picked: typeof unused = []
+		let want = nextThemeFor(schedule, batch.id)
+		while (picked.length < limit) {
+			const video = unused.find((v) => v.theme === want && !picked.includes(v))
+			if (!video) break
+			picked.push(video)
+			want = otherTheme(want)
+		}
+		if (picked.length === 0) throw new Error(`no unused ${want} video in ${group.label}, and the sequence needs ${want} next`)
 		batch.items = picked.map((video) => emptyItem(video.file))
+		const short = picked.length < limit ? ` (no unused ${want} video left to continue)` : ''
 		emit({
 			type: 'log',
 			index: null,
-			line: `Filled ${batch.id} with ${picked.length} video(s) from ${group.label}${picked.length < limit ? ` (only ${picked.length} unused)` : ''}.`,
+			line: `Filled ${batch.id} with ${picked.length} video(s) from ${group.label}, alternating ${picked.map((v) => v.theme).join('/')}${short}.`,
 		})
 	}
 	return batch
@@ -175,6 +188,14 @@ async function run(options: RunOptions, emit: (e: RunEvent) => void): Promise<bo
 		.filter(({ item, dueAt }) => postedServices(item).length < services.length && Date.parse(dueAt) < Date.now() + MIN_LEAD_MS)
 	if (late.length > 0) {
 		const message = `${late.length} post(s) would be due in the past (first: day ${late[0].index + 1}, ${late[0].dueAt}). Move ${batch.id}'s start to ${addDays(today(settings.timeZone), 1)} or later.`
+		if (!options.dryRun) throw new Error(message)
+		emit({ type: 'log', index: null, line: `warning: ${message}` })
+	}
+
+	// Light and dark always alternate, across batches too.
+	const outOfSequence = themeProblems(schedule, batch.id)
+	if (outOfSequence.length > 0) {
+		const message = `light and dark must alternate: ${outOfSequence.map(describeProblem).join('; ')}`
 		if (!options.dryRun) throw new Error(message)
 		emit({ type: 'log', index: null, line: `warning: ${message}` })
 	}

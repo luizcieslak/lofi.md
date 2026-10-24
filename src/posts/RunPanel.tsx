@@ -82,10 +82,12 @@ interface Props {
 	run: RunState | null
 	/** Why a run can't start right now, or null when it can. */
 	canRun: string | null
+	/** Set when light/dark doesn't alternate: drafts and scheduling stay off, a dry run still works. */
+	themeBlock: string | null
 	onRun: (mode: RunMode) => void
 }
 
-export function RunPanel({ batch, settings, run, canRun, onRun }: Props) {
+export function RunPanel({ batch, settings, run, canRun, themeBlock, onRun }: Props) {
 	const [confirming, setConfirming] = useState(false)
 	const count = batch.items.length
 	const disabled = canRun !== null || count === 0 || run?.running === true
@@ -99,17 +101,22 @@ export function RunPanel({ batch, settings, run, canRun, onRun }: Props) {
 				<button type="button" className="btn" disabled={disabled} onClick={() => onRun('dry')}>
 					Dry run
 				</button>
-				<button type="button" className="btn" disabled={disabled} onClick={() => onRun('draft')}>
+				<button type="button" className="btn" disabled={disabled || themeBlock !== null} onClick={() => onRun('draft')}>
 					Save as drafts
 				</button>
-				<button type="button" className="btn btn-primary" disabled={disabled || pastDue} onClick={() => setConfirming(true)}>
+				<button type="button" className="btn btn-primary" disabled={disabled || pastDue || themeBlock !== null} onClick={() => setConfirming(true)}>
 					Schedule {count} post{count === 1 ? '' : 's'}
 				</button>
-				{canRun && <span className="run-hint">{canRun}</span>}
-				{!canRun && pastDue && <span className="run-hint warn">Day 1 is in the past. Move the start date.</span>}
+				{themeBlock ? (
+					<span className="run-hint error">{themeBlock}</span>
+				) : canRun ? (
+					<span className="run-hint">{canRun}</span>
+				) : (
+					pastDue && <span className="run-hint warn">Day 1 is in the past. Move the start date.</span>
+				)}
 			</div>
 
-			{confirming && (
+			{confirming && !themeBlock && (
 				<div className="confirm" role="alertdialog" aria-label="Confirm scheduling">
 					<p>
 						Upload {count} video{count === 1 ? '' : 's'} to R2 and schedule them on YouTube, TikTok and Instagram: one a day,{' '}

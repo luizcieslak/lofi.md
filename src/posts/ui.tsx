@@ -2,7 +2,7 @@ import { buildCaption, resolveItem } from '../../scripts/lib/caption.ts'
 import type { Caption, ResolvedItem } from '../../scripts/lib/caption.ts'
 import type { CatalogVideo } from '../../scripts/lib/catalog.ts'
 import { SERVICES } from '../../scripts/lib/types.ts'
-import type { BatchItem, Handles, Service } from '../../scripts/lib/types.ts'
+import type { BatchItem, Handles, Service, Theme } from '../../scripts/lib/types.ts'
 
 const DAY = new Intl.DateTimeFormat('en-US', { weekday: 'short', day: 'numeric', timeZone: 'UTC' })
 const DATE = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
@@ -31,6 +31,16 @@ export function Art({ src, size = 36 }: { src: string | null | undefined; size?:
 
 export function Chip({ tone = 'muted', children }: { tone?: 'muted' | 'warn' | 'ok' | 'accent' | 'error'; children: React.ReactNode }) {
 	return <span className={`chip chip-${tone}`}>{children}</span>
+}
+
+/** A render's light/dark theme: a dot, plus the word when `label` is set. */
+export function ThemeSwatch({ theme, label = false }: { theme: Theme; label?: boolean }) {
+	return (
+		<span className="theme" data-theme={theme} title={`${theme} render`}>
+			<span className="theme-dot" aria-hidden="true" />
+			{label ? theme : <span className="sr-only">{theme}</span>}
+		</span>
+	)
 }
 
 /** One dot per network: filled once that network has a post id. */

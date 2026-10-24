@@ -10,14 +10,17 @@
 //   node scripts/schedule.ts new-batch [--start YYYY-MM-DD]
 //   node scripts/schedule.ts run [next|<id>] [--dry-run] [--draft] [--only a,b] [--limit n] [--folder f] [--json]
 //   node scripts/schedule.ts handle <artist> [@handle…]
+//   node scripts/schedule.ts theme-before <light|dark>
 
+import { existsSync } from 'node:fs'
 import { parseArgs } from 'node:util'
 import { dueAtFor, emptyItem, newBatch, nextBatch, nextWindowStart, sortBatches, windowEnd } from './lib/batches.ts'
 import { buildCaption, resolveItem } from './lib/caption.ts'
 import { buildCatalog, findVideo } from './lib/catalog.ts'
 import { RECORDINGS_DIR, today } from './lib/env.ts'
-import { findGroup } from './lib/recordings.ts'
+import { absolutePath, findGroup } from './lib/recordings.ts'
 import { runBatch } from './lib/runner.ts'
+import { describeProblem, nextThemeFor, themeOf, themeProblems, themeSequence } from './lib/theme.ts'
 import { loadHandles, loadSchedule, saveHandles, saveSchedule } from './lib/store.ts'
 import { SERVICES, isService } from './lib/types.ts'
 import type { Batch, RunEvent, Schedule, Service } from './lib/types.ts'
@@ -41,6 +44,7 @@ Commands:
       --folder <name>               Fill an empty batch from this recordings folder
       --json                        Stream NDJSON events (used by the posts UI)
   handle <artist> [@handle…]        Set an artist's Instagram handles (none = remove)
+  theme-before <light|dark>         Theme of the last post before light/dark alternation
 
 Files are relative to ${RECORDINGS_DIR}.`
 
@@ -58,6 +62,10 @@ function findBatch(schedule: Schedule, id: string | undefined): Batch {
 		return batch
 	}
 	return schedule.batches.find((b) => b.id === id) ?? fail(`no batch "${id}"`)
+}
+
+function assertExists(file: string): void {
+	if (!existsSync(absolutePath(file))) fail(`${file} is not in ${RECORDINGS_DIR}; use a path from \`videos\``)
 }
 
 function assertEditable(batch: Batch): void {
@@ -80,6 +88,8 @@ async function printBatches(schedule: Schedule): Promise<void> {
 	const catalog = await buildCatalog(schedule)
 	const handles = loadHandles()
 	const next = nextBatch(schedule)
+	const expected = new Map(themeSequence(schedule).map((slot) => [slot.file, slot.expected]))
+	console.log(`Light/dark alternate; the post before the first batch was ${schedule.settings.themeBefore}.`)
 	if (schedule.batches.length === 0) console.log('No batches yet. Run `new-batch` or `run next`.')
 	for (const batch of sortBatches(schedule.batches)) {
 		const marker = batch.id === next?.id ? '  ← next' : ''
@@ -92,11 +102,18 @@ async function printBatches(schedule: Schedule): Promise<void> {
 			const caption = buildCaption(resolved, item.extra, handles)
 			const done = SERVICES.filter((s) => item.posts[s]).join(',')
 			const due = batch.imported ? 'queued' : dueAtFor(batch, index, schedule.settings).slice(0, 16).replace('T', ' ')
-			console.log(`  ${String(index + 1).padStart(2)}. ${due}  ${caption.credit}${resolved.matched ? '' : '  (no radio match)'}`)
+			const theme = themeOf(item.file)
+			const want = expected.get(item.file)
+			const flag = want && want !== theme ? `  ! needs ${want}` : ''
+			console.log(`  ${String(index + 1).padStart(2)}. ${due}  ${theme.padEnd(5)}  ${caption.credit}${resolved.matched ? '' : '  (no radio match)'}${flag}`)
 			console.log(`      ${item.file}${done ? `  [${done}]` : ''}${item.error ? `  ! ${item.error.split('\n')[0]}` : ''}`)
 			if (item.extra) console.log(`      + ${item.extra}`)
 		}
+		if (!batch.imported && batch.items.length < schedule.settings.batchSize)
+			console.log(`      next video here must be ${nextThemeFor(schedule, batch.id)}`)
 	}
+	const problems = themeProblems(schedule)
+	if (problems.length > 0) console.log(`\nOut of sequence:\n${problems.map((p) => `  ${describeProblem(p)}`).join('\n')}`)
 }
 
 async function printVideos(schedule: Schedule, folder: string | undefined): Promise<void> {
@@ -107,7 +124,7 @@ async function printVideos(schedule: Schedule, folder: string | undefined): Prom
 		const marker = group.id === catalog.defaultGroupId ? '  ← default' : ''
 		console.log(`\n${group.label} (${group.id || 'recordings root'})  ${group.videos.length} video(s)${marker}`)
 		for (const video of group.videos) {
-			const label = video.track ? `${video.track.title} — ${video.track.artist}` : `${video.slug}  (no radio match)`
+			const label = `${video.theme.padEnd(5)}  ${video.track ? `${video.track.title} — ${video.track.artist}` : `${video.slug}  (no radio match)`}`
 			console.log(`  ${video.batchId ? `[${video.batchId}]` : '        '.padEnd(12)}  ${label}`)
 			console.log(`  ${''.padEnd(12)}  ${video.file}`)
 		}
@@ -185,6 +202,7 @@ async function main(): Promise<void> {
 			const batch = findBatch(schedule, values.batch)
 			assertEditable(batch)
 			for (const file of rest) {
+				assertExists(file)
 				removeFromBatches(schedule, file)
 				batch.items.push(emptyItem(file))
 			}
@@ -196,6 +214,7 @@ async function main(): Promise<void> {
 		case 'move': {
 			const [file] = rest
 			if (!file || !values.batch) fail('move needs <file> --batch <id>')
+			assertExists(file)
 			const source = schedule.batches.find((b) => b.items.some((item) => item.file === file))
 			const item = source?.items.find((i) => i.file === file) ?? emptyItem(file)
 			const target = findBatch(schedule, values.batch)
@@ -242,6 +261,15 @@ async function main(): Promise<void> {
 			if (list.length === 0) delete handles[artist.toLowerCase()]
 			else handles[artist.toLowerCase()] = list.map((h) => (h.startsWith('@') ? h : `@${h}`))
 			saveHandles(handles)
+			return
+		}
+
+		case 'theme-before': {
+			const [theme] = rest
+			if (theme !== 'light' && theme !== 'dark') fail('theme-before takes light or dark')
+			schedule.settings.themeBefore = theme
+			saveSchedule(schedule)
+			console.error(`The post before the first batch was ${theme}; the sequence starts ${theme === 'light' ? 'dark' : 'light'}.`)
 			return
 		}
 

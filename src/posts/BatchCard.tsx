@@ -3,10 +3,11 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities'
 import { addDays, dueAtFor, windowEnd } from '../../scripts/lib/batches.ts'
 import type { CatalogVideo } from '../../scripts/lib/catalog.ts'
-import type { Batch, BatchItem, Handles, ScheduleSettings } from '../../scripts/lib/types.ts'
+import { otherTheme, themeOf } from '../../scripts/lib/theme.ts'
+import type { Batch, BatchItem, Handles, ScheduleSettings, Theme } from '../../scripts/lib/types.ts'
 import { RunPanel } from './RunPanel.tsx'
 import type { RunState } from './RunPanel.tsx'
-import { Art, Chip, ServiceDots, formatDate, formatDay, viewItem } from './ui.tsx'
+import { Art, Chip, ServiceDots, ThemeSwatch, formatDate, formatDay, viewItem } from './ui.tsx'
 
 interface Props {
 	batch: Batch
@@ -17,6 +18,12 @@ interface Props {
 	selected: string | null
 	run: RunState | null
 	canRun: string | null
+	/** Theme each placed video's position requires. */
+	expected: Map<string, Theme>
+	/** Theme the first empty slot requires. */
+	nextTheme: Theme
+	/** Why scheduling is blocked by the light/dark sequence, or null. */
+	themeBlock: string | null
 	onSelect: (file: string) => void
 	onEdit: (patch: Partial<Pick<Batch, 'start' | 'note'>>) => void
 	onRemove: () => void
@@ -28,6 +35,7 @@ export function BatchCard(props: Props) {
 	const locked = batch.status !== 'draft' || run?.running === true
 	const { setNodeRef, isOver } = useDroppable({ id: `batch:${batch.id}`, data: { kind: 'batch', batchId: batch.id }, disabled: locked })
 	const emptySlots = Math.max(0, settings.batchSize - batch.items.length)
+	const outOfSequence = batch.imported ? 0 : batch.items.filter((item) => props.expected.get(item.file) !== themeOf(item.file)).length
 
 	return (
 		<section className="batch" data-next={isNext ? '' : undefined} data-status={batch.status} aria-label={`Batch ${batch.id}`}>
@@ -41,6 +49,7 @@ export function BatchCard(props: Props) {
 					<span className="count">
 						{batch.items.length}/{settings.batchSize}
 					</span>
+					{outOfSequence > 0 && <Chip tone="error">{outOfSequence} out of sequence</Chip>}
 				</div>
 				{batch.status === 'draft' && (
 					<div className="batch-controls">
@@ -73,16 +82,19 @@ export function BatchCard(props: Props) {
 							selected={props.selected === item.file}
 							runState={run?.items[index]}
 							run={run}
+							expected={batch.imported ? null : (props.expected.get(item.file) ?? null)}
 							onSelect={props.onSelect}
 						/>
 					))}
 					{!locked &&
 						Array.from({ length: emptySlots }, (_, n) => {
 							const index = batch.items.length + n
+							const want = n % 2 === 0 ? props.nextTheme : otherTheme(props.nextTheme)
 							return (
 								<li key={`empty-${index}`} className="slot slot-empty">
 									<span className="slot-day">{formatDay(addDays(batch.start, index))}</span>
-									<span className="slot-hint">{n === 0 ? 'Drop a video here' : ''}</span>
+									<ThemeSwatch theme={want} label />
+									<span className="slot-hint">{n === 0 ? `Drop a ${want} video here` : ''}</span>
 								</li>
 							)
 						})}
@@ -90,7 +102,7 @@ export function BatchCard(props: Props) {
 			</SortableContext>
 
 			{!batch.imported && batch.status !== 'scheduled' && (
-				<RunPanel batch={batch} settings={settings} run={run} canRun={props.canRun} onRun={props.onRun} />
+				<RunPanel batch={batch} settings={settings} run={run} canRun={props.canRun} themeBlock={props.themeBlock} onRun={props.onRun} />
 			)}
 		</section>
 	)
@@ -107,6 +119,7 @@ function SlotItem({
 	selected,
 	runState,
 	run,
+	expected,
 	onSelect,
 }: {
 	item: BatchItem
@@ -119,6 +132,7 @@ function SlotItem({
 	selected: boolean
 	runState: RunState['items'][number] | undefined
 	run: RunState | null
+	expected: Theme | null
 	onSelect: (file: string) => void
 }) {
 	const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
@@ -128,6 +142,8 @@ function SlotItem({
 	})
 	const { resolved, caption } = viewItem(item, video, item.file, handles)
 	const day = batch.imported ? null : dueAtFor(batch, index, settings)
+	const theme = themeOf(item.file)
+	const wrongTheme = expected !== null && expected !== theme
 
 	return (
 		<li
@@ -138,6 +154,7 @@ function SlotItem({
 			data-selected={selected ? '' : undefined}
 			data-locked={locked ? '' : undefined}
 			data-run={runState?.state}
+			data-theme-error={wrongTheme ? '' : undefined}
 			{...attributes}
 			{...listeners}
 			onClick={() => onSelect(item.file)}
@@ -155,6 +172,8 @@ function SlotItem({
 				</span>
 			</span>
 			<span className="row-chips">
+				<ThemeSwatch theme={theme} />
+				{wrongTheme && <Chip tone="error">needs {expected}</Chip>}
 				{!resolved.matched && !item.title && <Chip tone="warn">no match</Chip>}
 				{!video && <Chip tone="error">missing file</Chip>}
 				{item.error && <Chip tone="error">failed</Chip>}

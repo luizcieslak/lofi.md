@@ -1,6 +1,6 @@
 import { emptyItem, newBatch, nextWindowStart } from '../../scripts/lib/batches.ts'
 import type { Catalog, CatalogVideo } from '../../scripts/lib/catalog.ts'
-import type { Batch, BatchItem, Handles, Schedule, Track } from '../../scripts/lib/types.ts'
+import type { Batch, BatchItem, Handles, Schedule, Theme, Track } from '../../scripts/lib/types.ts'
 import type { Config } from './api.ts'
 
 export type Tab = 'batches' | 'handles'
@@ -52,6 +52,7 @@ export type Action =
 	| { type: 'editItem'; file: string; patch: Partial<Pick<BatchItem, 'extra' | 'title' | 'artist'>> }
 	| { type: 'editBatch'; id: string; patch: Partial<Pick<Batch, 'start' | 'note'>> }
 	| { type: 'addBatch'; today: string }
+	| { type: 'themeBefore'; theme: Theme }
 	| { type: 'removeBatch'; id: string }
 	| { type: 'setHandles'; artist: string; handles: string[] }
 	| { type: 'select'; file: string | null }
@@ -131,6 +132,9 @@ export function reducer(state: State, action: Action): State {
 				...schedule,
 				batches: [...schedule.batches, newBatch(schedule, nextWindowStart(schedule, action.today))],
 			}))
+
+		case 'themeBefore':
+			return withSchedule(state, (schedule) => ({ ...schedule, settings: { ...schedule.settings, themeBefore: action.theme } }))
 
 		case 'removeBatch':
 			return withSchedule(state, (schedule) => ({
