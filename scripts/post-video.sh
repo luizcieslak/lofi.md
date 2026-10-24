@@ -25,7 +25,7 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 # TikTok and YouTube Shorts share the long set; Instagram gets its own, because
 # Buffer keeps only the first 5 tags on a Reel and these are the 5 worth keeping.
 HASHTAGS="#lofi #lowfi #chill #music #catjam #lofihiphop #studymusic #lofiradio #codingmusic"
-INSTAGRAM_HASHTAGS_BASE="#lofi #lofihiphop #studymusic #lofiradio #codingmusic"
+INSTAGRAM_HASHTAGS_BASE="#lofi #chill #lofihiphop #studymusic"
 
 YOUTUBE_CATEGORY_ID="10" # Music
 YOUTUBE_PRIVACY="public"
@@ -454,8 +454,8 @@ for svc in "${SERVICES[@]}"; do
 	payload="$(payload_for "$svc")"
 
 	if ! response="$(buffer posts create --json "$payload" --fields "$CREATE_FIELDS" --output json 2>&1)"; then
-		echo "  failed: $svc" >&2
-		echo "$response" >&2
+		# One line, so callers that keep only "failed:" lines still get the reason.
+		echo "  failed: $svc — $(printf '%s' "$response" | tr '\n' ' ')" >&2
 		FAILED+=("$svc")
 		continue
 	fi
