@@ -155,8 +155,17 @@ function SlotItem({
 			data-locked={locked ? '' : undefined}
 			data-run={runState?.state}
 			data-theme-error={wrongTheme ? '' : undefined}
-			{...attributes}
-			{...listeners}
+			// Locked rows can't be dragged but still open the inspector, so skip dnd-kit's aria-disabled.
+			{...(locked ? { role: 'button', tabIndex: 0 } : attributes)}
+			{...(locked
+				? {
+						onKeyDown: (event: React.KeyboardEvent) => {
+							if (event.key !== 'Enter' && event.key !== ' ') return
+							event.preventDefault()
+							onSelect(item.file)
+						},
+					}
+				: listeners)}
 			onClick={() => onSelect(item.file)}
 		>
 			<span className="slot-day">{day ? formatDay(day.slice(0, 10)) : `#${index + 1}`}</span>

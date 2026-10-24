@@ -5,7 +5,7 @@
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import type { Plugin } from 'vite'
 import { dueAtFor, isRecord, isSchedule, validateSchedule } from './lib/batches.ts'
 import { buildCaption, resolveItem } from './lib/caption.ts'
@@ -56,14 +56,15 @@ function isHandles(value: unknown): value is Handles {
  * must never wipe them, so those fields always come from disk.
  */
 function keepRunnerFields(incoming: Schedule, current: Schedule): Schedule {
+	// Keyed by file name, not path: the page may still hold a path from before an archive move.
 	const onDisk = new Map<string, BatchItem>()
-	for (const batch of current.batches) for (const item of batch.items) onDisk.set(item.file, item)
+	for (const batch of current.batches) for (const item of batch.items) onDisk.set(basename(item.file), item)
 	return {
 		...incoming,
 		batches: incoming.batches.map((batch) => ({
 			...batch,
 			items: batch.items.map((item) => {
-				const saved = onDisk.get(item.file)
+				const saved = onDisk.get(basename(item.file))
 				return saved ? { ...item, posts: saved.posts, r2Key: saved.r2Key, url: saved.url, error: saved.error } : item
 			}),
 		})),

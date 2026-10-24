@@ -113,8 +113,17 @@ function LibraryRow({
 			data-dragging={isDragging ? '' : undefined}
 			data-selected={selected ? '' : undefined}
 			data-locked={locked ? '' : undefined}
-			{...attributes}
-			{...listeners}
+			// Locked rows can't be dragged but still open the inspector, so skip dnd-kit's aria-disabled.
+			{...(locked ? { role: 'button', tabIndex: 0 } : attributes)}
+			{...(locked
+				? {
+						onKeyDown: (event: React.KeyboardEvent) => {
+							if (event.key !== 'Enter' && event.key !== ' ') return
+							event.preventDefault()
+							onSelect(video.file)
+						},
+					}
+				: listeners)}
 			onClick={() => onSelect(video.file)}
 		>
 			<Art src={video.track?.albumArtUrl} />

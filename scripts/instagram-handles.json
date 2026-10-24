@@ -1,12 +1,113 @@
 {
-	"remulak": ["@remulakbeats"],
-	"coubo": ["@coubo.wav"],
-	"tulini": ["@_yung.tulini_"],
-	"jinsang": ["@jinsangbeats"],
-	"quetzal": ["@al.quetz_"],
-	"the deli": ["@thedeli23"],
-	"denk": ["@denkfabrik_tontraeger"],
-	"drumtomski": ["@drumtomski"],
-	"vanilla": ["@vanillabeats"],
-	"mf doom": ["@mfdoom"]
+	"ak420": [
+		"@ak420music"
+	],
+	"avocuddle": [
+		"@iamavocuddle"
+	],
+	"axian": [
+		"@chillaxian"
+	],
+	"bóreas": [
+		"@alejandroidermz"
+	],
+	"carlskee": [
+		"@carlskee_"
+	],
+	"cookin soul": [
+		"@cookingsoul"
+	],
+	"coubo": [
+		"@coubo.wav"
+	],
+	"denk": [
+		"@denkfabrik_tontraeger"
+	],
+	"dexter": [
+		"@diggidexter"
+	],
+	"drumtomski": [
+		"@drumtomski"
+	],
+	"emapea": [
+		"@emapea.music"
+	],
+	"engelwood": [
+		"@engelwood"
+	],
+	"fets": [
+		"@iam.fets"
+	],
+	"flitz&suppe": [
+		"@flitzsuppe"
+	],
+	"flofilz": [
+		"@flofilz"
+	],
+	"funki flava": [
+		"@funkiflava"
+	],
+	"gabrielmzero": [
+		"@gabrielmzero_"
+	],
+	"guru griff": [
+		"@gurugriff"
+	],
+	"homage": [
+		"@homagebeats"
+	],
+	"homeage": [
+		"@homagebeats"
+	],
+	"jeff kaale": [
+		"@jeffkaale"
+	],
+	"jinsang": [
+		"@jinsangbeats"
+	],
+	"klim": [
+		"@klimbeats"
+	],
+	"lofi fruits music": [
+		"@lofifruitsmusic"
+	],
+	"mf doom": [
+		"@mfdoom"
+	],
+	"mikedecline": [
+		"@mikedecline"
+	],
+	"mvnitou": [
+		"@mvnitoulofi"
+	],
+	"philanthrope": [
+		"@philantrope__"
+	],
+	"poptartpete": [
+		"@poptartpete_"
+	],
+	"quetzal": [
+		"@al.quetz_"
+	],
+	"remulak": [
+		"@remulakbeats"
+	],
+	"sebastian kamae": [
+		"@sebastiankamae"
+	],
+	"snares": [
+		"@snares98"
+	],
+	"the deli": [
+		"@thedeli23"
+	],
+	"tulini": [
+		"@_yung.tulini_"
+	],
+	"vanilla": [
+		"@vanillabeats"
+	],
+	"vibin'": [
+		"@vibin.justlisten"
+	]
 }

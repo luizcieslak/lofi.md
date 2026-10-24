@@ -70,6 +70,17 @@ export function findGroup<G extends Pick<VideoGroup, 'id' | 'label'>>(groups: G[
 	return groups.find((g) => g.id === wanted || g.label === wanted || g.id === `backup/${wanted}`) ?? null
 }
 
+/**
+ * File name → where it lives now, newest folder first. Names carry the render's
+ * uuid, so the same name anywhere is the same video.
+ */
+export function locateByName(dir = RECORDINGS_DIR): Map<string, string> {
+	const found = new Map<string, string>()
+	if (!existsSync(dir)) return found
+	for (const group of listVideoGroups(dir)) for (const video of group.videos) if (!found.has(video.name)) found.set(video.name, video.file)
+	return found
+}
+
 export function absolutePath(file: string, dir = RECORDINGS_DIR): string {
 	return join(dir, file)
 }

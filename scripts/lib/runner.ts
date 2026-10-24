@@ -62,6 +62,8 @@ export interface ScriptResult {
 	code: number
 	posts: (PostRecord & { service: Service })[]
 	payloads: { service: Service; payload: unknown }[]
+	/** post-video.sh's per-network failure lines, with Buffer's message. */
+	failures: string[]
 	tail: string[]
 }
 
@@ -69,7 +71,7 @@ export interface ScriptResult {
 export function postVideo(args: string[], onLog: (line: string) => void): Promise<ScriptResult> {
 	return new Promise((resolve, reject) => {
 		const child = spawn(POST_VIDEO, [...args, '--report', 'json'], { cwd: ROOT_DIR, env: process.env })
-		const result: ScriptResult = { code: 0, posts: [], payloads: [], tail: [] }
+		const result: ScriptResult = { code: 0, posts: [], payloads: [], failures: [], tail: [] }
 		let stdout = ''
 		const handleLine = (line: string) => {
 			if (!line.trim()) return
@@ -104,6 +106,8 @@ export function postVideo(args: string[], onLog: (line: string) => void): Promis
 			for (const line of chunk.toString().split('\n')) {
 				if (!line.trim()) continue
 				result.tail = [...result.tail, line].slice(-6)
+				// "  failed: youtube — LimitReachedError: …", "    raw: …", "error: …"
+				if (/^\s*(failed: |raw: |error: )/.test(line)) result.failures.push(line.trim())
 				onLog(line)
 			}
 		})
@@ -254,7 +258,7 @@ async function run(options: RunOptions, emit: (e: RunEvent) => void): Promise<bo
 			}
 
 			if (result.code !== 0) {
-				const error = result.tail.filter((line) => /error|failed/i.test(line)).join('\n') || result.tail.join('\n')
+				const error = result.failures.join('\n') || result.tail.join('\n')
 				item.error = error || `post-video.sh exited ${result.code}`
 				failed++
 				emit({ type: 'item-done', index, ok: false, skipped: false, error: item.error })

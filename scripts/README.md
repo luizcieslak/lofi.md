@@ -304,3 +304,9 @@ Only one run can happen at a time, across the terminal and the browser.
   `addToQueue` before post ids were recorded.
 - [`instagram-handles.json`](instagram-handles.json): lowercase artist → handles.
   Credits like `dEnk, Drumtomski` are split, and each artist's handles are added.
+
+### Failure runbook
+
+If an automated or manual scheduling run fails, follow
+[`SCHEDULE-RUNBOOK.md`](SCHEDULE-RUNBOOK.md). Treat Buffer as the source of
+truth before retrying a partial run.

@@ -5,9 +5,14 @@ import type { BatchItem, Handles, TrackMatch } from './types.ts'
 /** Three line breaks between the credit line and the extra text. */
 export const EXTRA_SEPARATOR = '<br><br><br>'
 
+/**
+ * "Flitz&Suppe, bert cussion" → ["Flitz&Suppe", "bert cussion"], so each artist
+ * keeps its own handles. The radio separates artists with commas (or feat./ft.);
+ * "&" and " x " stay inside names like 7&Nine and Saito & Lester.
+ */
 export function splitArtistNames(artist: string): string[] {
 	return artist
-		.split(/\s*(?:,|&|\s+x\s+|\s+(?:feat|ft)\.?\s+)\s*/i)
+		.split(/\s*(?:,|\s+(?:feat|ft)\.?\s+)\s*/i)
 		.map((name) => name.trim())
 		.filter(Boolean)
 }
