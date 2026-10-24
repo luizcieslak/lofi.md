@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { dueAtFor, windowEnd } from '../../scripts/lib/batches.ts'
+import { windowEnd } from '../../scripts/lib/batches.ts'
 import type { Batch, RunEvent, ScheduleSettings, Service } from '../../scripts/lib/types.ts'
 import { bufferChannelUrl } from './api.ts'
 import { SERVICE_LABEL, formatDate } from './ui.tsx'
@@ -91,8 +91,6 @@ export function RunPanel({ batch, settings, run, canRun, themeBlock, onRun }: Pr
 	const [confirming, setConfirming] = useState(false)
 	const count = batch.items.length
 	const disabled = canRun !== null || count === 0 || run?.running === true
-	const first = count > 0 ? dueAtFor(batch, 0, settings) : null
-	const pastDue = first !== null && Date.parse(first) < Date.now() + 10 * 60 * 1000
 	const results = Object.entries(run?.items ?? {})
 
 	return (
@@ -104,23 +102,21 @@ export function RunPanel({ batch, settings, run, canRun, themeBlock, onRun }: Pr
 				<button type="button" className="btn" disabled={disabled || themeBlock !== null} onClick={() => onRun('draft')}>
 					Save as drafts
 				</button>
-				<button type="button" className="btn btn-primary" disabled={disabled || pastDue || themeBlock !== null} onClick={() => setConfirming(true)}>
+				<button type="button" className="btn btn-primary" disabled={disabled || themeBlock !== null} onClick={() => setConfirming(true)}>
 					Schedule {count} post{count === 1 ? '' : 's'}
 				</button>
 				{themeBlock ? (
 					<span className="run-hint error">{themeBlock}</span>
 				) : canRun ? (
 					<span className="run-hint">{canRun}</span>
-				) : (
-					pastDue && <span className="run-hint warn">Day 1 is in the past. Move the start date.</span>
-				)}
+				) : null}
 			</div>
 
 			{confirming && !themeBlock && (
 				<div className="confirm" role="alertdialog" aria-label="Confirm scheduling">
 					<p>
-						Upload {count} video{count === 1 ? '' : 's'} to R2 and schedule them on YouTube, TikTok and Instagram: one a day,{' '}
-						{formatDate(batch.start)} → {formatDate(windowEnd(batch, settings))}, at {settings.postTime} {settings.timeZone}.
+						Upload {count} video{count === 1 ? '' : 's'} to R2 and queue them on YouTube, TikTok and Instagram using each channel's Buffer schedule. Batch window:{' '}
+						{formatDate(batch.start)} → {formatDate(windowEnd(batch, settings))}.
 					</p>
 					<p className="confirm-note">Buffer posts can't be deduplicated. Anything already scheduled is skipped.</p>
 					<div className="confirm-actions">

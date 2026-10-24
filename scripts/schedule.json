@@ -1,7 +1,6 @@
 {
 	"version": 1,
 	"settings": {
-		"postTime": "18:00",
 		"timeZone": "America/Sao_Paulo",
 		"windowDays": 10,
 		"batchSize": 10,
@@ -120,7 +119,7 @@
 		{
 			"id": "2026-10-24",
 			"start": "2026-10-24",
-			"status": "draft",
+			"status": "scheduled",
 			"note": "",
 			"items": [
 				{
@@ -130,7 +129,26 @@
 					"artist": "Jinsang",
 					"r2Key": "lofi.md/2026-10-23/bliss-937a1e77-2535-4da5-8880-d94626372aa4-dark-1080x1920.mp4",
 					"url": "https://cdn.cieslak.dev/lofi.md/2026-10-23/bliss-937a1e77-2535-4da5-8880-d94626372aa4-dark-1080x1920.mp4",
-					"posts": {},
+					"posts": {
+						"youtube": {
+							"id": "6adca2508b3d437ddcb9ca3e",
+							"status": "scheduled",
+							"dueAt": "2026-10-24T22:28:00.000Z",
+							"channelId": "6ab17713ea19ca0bdea8e80c"
+						},
+						"tiktok": {
+							"id": "6adca2513d5b27036b82b8e6",
+							"status": "scheduled",
+							"dueAt": "2026-10-24T20:37:00.000Z",
+							"channelId": "6ab176e6ea19ca0bdea8e66e"
+						},
+						"instagram": {
+							"id": "6adca2538b3d437ddcb9caa2",
+							"status": "scheduled",
+							"dueAt": "2026-10-24T19:20:00.000Z",
+							"channelId": "6ab17581ea19ca0bdea8d98a"
+						}
+					},
 					"error": null
 				},
 				{
@@ -140,7 +158,26 @@
 					"artist": "Flofilz",
 					"r2Key": "lofi.md/2026-10-23/flofilz-ruamarelo-27e4c86f-cd48-4004-b334-629b8f96cffd-light-1080x1920.mp4",
 					"url": "https://cdn.cieslak.dev/lofi.md/2026-10-23/flofilz-ruamarelo-27e4c86f-cd48-4004-b334-629b8f96cffd-light-1080x1920.mp4",
-					"posts": {},
+					"posts": {
+						"youtube": {
+							"id": "6adca254e4be8a4d8659c3a4",
+							"status": "scheduled",
+							"dueAt": "2026-10-25T23:52:00.000Z",
+							"channelId": "6ab17713ea19ca0bdea8e80c"
+						},
+						"tiktok": {
+							"id": "6adca2556887a2efc1b693b3",
+							"status": "scheduled",
+							"dueAt": "2026-10-25T12:25:00.000Z",
+							"channelId": "6ab176e6ea19ca0bdea8e66e"
+						},
+						"instagram": {
+							"id": "6adca256bd33ce99c320c062",
+							"status": "scheduled",
+							"dueAt": "2026-10-25T19:20:00.000Z",
+							"channelId": "6ab17581ea19ca0bdea8d98a"
+						}
+					},
 					"error": null
 				},
 				{
@@ -150,7 +187,26 @@
 					"artist": null,
 					"r2Key": "lofi.md/2026-10-23/emapea-brick-in-the-pocket-20fc70f7-6924-42b9-bb8c-9a5582969903-dark-1080x1920.mp4",
 					"url": "https://cdn.cieslak.dev/lofi.md/2026-10-23/emapea-brick-in-the-pocket-20fc70f7-6924-42b9-bb8c-9a5582969903-dark-1080x1920.mp4",
-					"posts": {},
+					"posts": {
+						"youtube": {
+							"id": "6adca2586887a2efc1b693f0",
+							"status": "scheduled",
+							"dueAt": "2026-10-26T19:20:00.000Z",
+							"channelId": "6ab17713ea19ca0bdea8e80c"
+						},
+						"tiktok": {
+							"id": "6adca259bd33ce99c320c092",
+							"status": "scheduled",
+							"dueAt": "2026-10-26T12:49:00.000Z",
+							"channelId": "6ab176e6ea19ca0bdea8e66e"
+						},
+						"instagram": {
+							"id": "6adca25a6887a2efc1b6945d",
+							"status": "scheduled",
+							"dueAt": "2026-10-26T23:28:00.000Z",
+							"channelId": "6ab17581ea19ca0bdea8d98a"
+						}
+					},
 					"error": null
 				},
 				{
@@ -160,17 +216,55 @@
 					"artist": null,
 					"r2Key": "lofi.md/2026-10-23/mikedecline-people-words-d01b2522-7cd6-46b5-91de-933c7b68cce0-light-1080x1920.mp4",
 					"url": "https://cdn.cieslak.dev/lofi.md/2026-10-23/mikedecline-people-words-d01b2522-7cd6-46b5-91de-933c7b68cce0-light-1080x1920.mp4",
-					"posts": {},
+					"posts": {
+						"youtube": {
+							"id": "6adca25b3d5b27036b82bacc",
+							"status": "scheduled",
+							"dueAt": "2026-10-27T23:53:00.000Z",
+							"channelId": "6ab17713ea19ca0bdea8e80c"
+						},
+						"tiktok": {
+							"id": "6adca25c8b3d437ddcb9cf4e",
+							"status": "scheduled",
+							"dueAt": "2026-10-27T10:49:00.000Z",
+							"channelId": "6ab176e6ea19ca0bdea8e66e"
+						},
+						"instagram": {
+							"id": "6adca25d6887a2efc1b69504",
+							"status": "scheduled",
+							"dueAt": "2026-10-27T22:12:00.000Z",
+							"channelId": "6ab17581ea19ca0bdea8d98a"
+						}
+					},
 					"error": null
 				},
 				{
 					"file": "backup/2026-10-23T23-48-17/please-chill-ceddd018-c387-4ad1-9e4c-2ece63bb7bca-dark-1080x1920.mp4",
-					"extra": "",
+					"extra": "you know all of that gets to go!",
 					"title": null,
 					"artist": null,
 					"r2Key": "lofi.md/2026-10-23/please-chill-ceddd018-c387-4ad1-9e4c-2ece63bb7bca-dark-1080x1920.mp4",
 					"url": "https://cdn.cieslak.dev/lofi.md/2026-10-23/please-chill-ceddd018-c387-4ad1-9e4c-2ece63bb7bca-dark-1080x1920.mp4",
-					"posts": {},
+					"posts": {
+						"youtube": {
+							"id": "6adca25e0b5343d0708113b5",
+							"status": "scheduled",
+							"dueAt": "2026-10-28T19:20:00.000Z",
+							"channelId": "6ab17713ea19ca0bdea8e80c"
+						},
+						"tiktok": {
+							"id": "6adca25f8b3d437ddcb9d42c",
+							"status": "scheduled",
+							"dueAt": "2026-10-28T19:20:00.000Z",
+							"channelId": "6ab176e6ea19ca0bdea8e66e"
+						},
+						"instagram": {
+							"id": "6adca2608b3d437ddcb9d456",
+							"status": "scheduled",
+							"dueAt": "2026-10-28T21:32:00.000Z",
+							"channelId": "6ab17581ea19ca0bdea8d98a"
+						}
+					},
 					"error": null
 				},
 				{
@@ -180,17 +274,55 @@
 					"artist": null,
 					"r2Key": "lofi.md/2026-10-23/virgo-flip-541ba434-8741-4494-be1a-d22699ec7cd3-light-1080x1920.mp4",
 					"url": "https://cdn.cieslak.dev/lofi.md/2026-10-23/virgo-flip-541ba434-8741-4494-be1a-d22699ec7cd3-light-1080x1920.mp4",
-					"posts": {},
+					"posts": {
+						"youtube": {
+							"id": "6adca2618b3d437ddcb9d49f",
+							"status": "scheduled",
+							"dueAt": "2026-10-29T23:19:00.000Z",
+							"channelId": "6ab17713ea19ca0bdea8e80c"
+						},
+						"tiktok": {
+							"id": "6adca2626887a2efc1b695f4",
+							"status": "scheduled",
+							"dueAt": "2026-10-29T19:20:00.000Z",
+							"channelId": "6ab176e6ea19ca0bdea8e66e"
+						},
+						"instagram": {
+							"id": "6adca2633d5b27036b82bfbc",
+							"status": "scheduled",
+							"dueAt": "2026-10-29T13:43:00.000Z",
+							"channelId": "6ab17581ea19ca0bdea8d98a"
+						}
+					},
 					"error": null
 				},
 				{
 					"file": "backup/2026-10-23T23-48-17/so-special-gonna-last-bcd323b2-7614-4459-98e8-29d81a88ebe9-dark-1080x1920.mp4",
-					"extra": "",
+					"extra": "👏 palmas 👏",
 					"title": null,
 					"artist": null,
 					"r2Key": "lofi.md/2026-10-23/so-special-gonna-last-bcd323b2-7614-4459-98e8-29d81a88ebe9-dark-1080x1920.mp4",
 					"url": "https://cdn.cieslak.dev/lofi.md/2026-10-23/so-special-gonna-last-bcd323b2-7614-4459-98e8-29d81a88ebe9-dark-1080x1920.mp4",
-					"posts": {},
+					"posts": {
+						"youtube": {
+							"id": "6adca264bd33ce99c320c4e9",
+							"status": "scheduled",
+							"dueAt": "2026-10-30T21:07:00.000Z",
+							"channelId": "6ab17713ea19ca0bdea8e80c"
+						},
+						"tiktok": {
+							"id": "6adca2653d5b27036b82c055",
+							"status": "scheduled",
+							"dueAt": "2026-10-31T01:48:00.000Z",
+							"channelId": "6ab176e6ea19ca0bdea8e66e"
+						},
+						"instagram": {
+							"id": "6adca2660b5343d070811502",
+							"status": "scheduled",
+							"dueAt": "2026-10-30T10:26:00.000Z",
+							"channelId": "6ab17581ea19ca0bdea8d98a"
+						}
+					},
 					"error": null
 				},
 				{
@@ -200,7 +332,26 @@
 					"artist": null,
 					"r2Key": "lofi.md/2026-10-23/in-a-sentimental-mood-d2d75ed7-845c-4348-b2e7-5a5dc3ee863b-light-1080x1920.mp4",
 					"url": "https://cdn.cieslak.dev/lofi.md/2026-10-23/in-a-sentimental-mood-d2d75ed7-845c-4348-b2e7-5a5dc3ee863b-light-1080x1920.mp4",
-					"posts": {},
+					"posts": {
+						"youtube": {
+							"id": "6adca267e4be8a4d8659c666",
+							"status": "scheduled",
+							"dueAt": "2026-10-31T22:28:00.000Z",
+							"channelId": "6ab17713ea19ca0bdea8e80c"
+						},
+						"tiktok": {
+							"id": "6adca2683d5b27036b82c0c3",
+							"status": "scheduled",
+							"dueAt": "2026-10-31T20:37:00.000Z",
+							"channelId": "6ab176e6ea19ca0bdea8e66e"
+						},
+						"instagram": {
+							"id": "6adca2690b5343d070811555",
+							"status": "scheduled",
+							"dueAt": "2026-10-31T19:20:00.000Z",
+							"channelId": "6ab17581ea19ca0bdea8d98a"
+						}
+					},
 					"error": null
 				},
 				{
@@ -208,9 +359,28 @@
 					"extra": "Bom dia! Guten Morgen! 🌞",
 					"title": null,
 					"artist": null,
-					"r2Key": null,
-					"url": null,
-					"posts": {},
+					"r2Key": "lofi.md/2026-10-24/sunday-morning-d6da2f38-d556-4561-ad0a-183d9319ad78-dark-1080x1920.mp4",
+					"url": "https://cdn.cieslak.dev/lofi.md/2026-10-24/sunday-morning-d6da2f38-d556-4561-ad0a-183d9319ad78-dark-1080x1920.mp4",
+					"posts": {
+						"youtube": {
+							"id": "6adca26a6887a2efc1b69733",
+							"status": "scheduled",
+							"dueAt": "2026-11-01T23:52:00.000Z",
+							"channelId": "6ab17713ea19ca0bdea8e80c"
+						},
+						"tiktok": {
+							"id": "6adca26b0b5343d070811580",
+							"status": "scheduled",
+							"dueAt": "2026-11-01T12:25:00.000Z",
+							"channelId": "6ab176e6ea19ca0bdea8e66e"
+						},
+						"instagram": {
+							"id": "6adca26c0b5343d0708115b9",
+							"status": "scheduled",
+							"dueAt": "2026-11-01T19:20:00.000Z",
+							"channelId": "6ab17581ea19ca0bdea8d98a"
+						}
+					},
 					"error": null
 				},
 				{
@@ -220,7 +390,26 @@
 					"artist": null,
 					"r2Key": "lofi.md/2026-10-23/miso-ramen-time-e2b1ef55-d1e4-4dc8-a519-5a40b0091865-light-1080x1920.mp4",
 					"url": "https://cdn.cieslak.dev/lofi.md/2026-10-23/miso-ramen-time-e2b1ef55-d1e4-4dc8-a519-5a40b0091865-light-1080x1920.mp4",
-					"posts": {},
+					"posts": {
+						"youtube": {
+							"id": "6adca26dbd33ce99c320c5ec",
+							"status": "scheduled",
+							"dueAt": "2026-11-02T19:20:00.000Z",
+							"channelId": "6ab17713ea19ca0bdea8e80c"
+						},
+						"tiktok": {
+							"id": "6adca26e6887a2efc1b697aa",
+							"status": "scheduled",
+							"dueAt": "2026-11-02T12:49:00.000Z",
+							"channelId": "6ab176e6ea19ca0bdea8e66e"
+						},
+						"instagram": {
+							"id": "6adca26fe4be8a4d8659c814",
+							"status": "scheduled",
+							"dueAt": "2026-11-02T23:28:00.000Z",
+							"channelId": "6ab17581ea19ca0bdea8d98a"
+						}
+					},
 					"error": null
 				}
 			]
@@ -255,7 +444,7 @@
 					"file": "mind-drifting-c74abe0a-7a82-4dbe-b77b-e4e03a51d62e-dark-1080x1920.mp4",
 					"extra": "this is one of my favorites. the album is a masterpiece.",
 					"title": null,
-					"artist": null,
+					"artist": "Homage",
 					"r2Key": null,
 					"url": null,
 					"posts": {},

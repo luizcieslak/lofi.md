@@ -7,11 +7,11 @@ import { existsSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { basename, join } from 'node:path'
 import type { Plugin } from 'vite'
-import { dueAtFor, isRecord, isSchedule, validateSchedule } from './lib/batches.ts'
+import { isRecord, isSchedule, validateSchedule } from './lib/batches.ts'
 import { buildCaption, resolveItem } from './lib/caption.ts'
 import { buildCatalog, findVideo } from './lib/catalog.ts'
 import { HANDLES_FILE, RECORDINGS_DIR, ROOT_DIR, SCHEDULE_FILE, SCHEDULER } from './lib/env.ts'
-import { postVideo, runningPid } from './lib/runner.ts'
+import { postVideo, queuePostArgs, runningPid } from './lib/runner.ts'
 import { loadHandles, loadSchedule, mtimeOf, saveHandles, saveSchedule, validateHandles } from './lib/store.ts'
 import { fetchTracks } from './lib/tracks.ts'
 import { SERVICES, isService } from './lib/types.ts'
@@ -141,13 +141,14 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
 			const placeholder = item.url ?? 'https://cdn.cieslak.dev/lofi.md/preview.mp4'
 			const log: string[] = []
 			const result = await postVideo(
-				[
-					'--video', placeholder,
-					'--description', caption.description,
-					'--title', caption.credit,
-					'--due-at', dueAtFor(batch, body.index, schedule.settings),
-					'--dry-run',
-				],
+				queuePostArgs({
+					url: placeholder,
+					description: caption.description,
+					title: caption.credit,
+					services: [...SERVICES],
+					draft: false,
+					dryRun: true,
+				}),
 				(line) => log.push(line),
 			)
 			return send(res, result.code === 0 ? 200 : 422, { payloads: result.payloads, log })

@@ -44,8 +44,6 @@ export interface Batch {
 export type Theme = 'light' | 'dark'
 
 export interface ScheduleSettings {
-	/** HH:MM, local to timeZone. */
-	postTime: string
 	timeZone: string
 	windowDays: number
 	batchSize: number

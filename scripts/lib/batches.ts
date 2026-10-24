@@ -4,7 +4,6 @@ import { SERVICES } from './types.ts'
 import type { Batch, BatchItem, BatchStatus, Schedule, ScheduleSettings, Service } from './types.ts'
 
 export const DEFAULT_SETTINGS: ScheduleSettings = {
-	postTime: '18:00',
 	timeZone: 'America/Sao_Paulo',
 	windowDays: 10,
 	batchSize: 10,
@@ -16,35 +15,6 @@ export const DEFAULT_SETTINGS: ScheduleSettings = {
 export function addDays(date: string, days: number): string {
 	const [y, m, d] = date.split('-').map(Number)
 	return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10)
-}
-
-/** The zone's UTC offset at an instant, e.g. "-03:00". */
-function offsetAt(instant: number, timeZone: string): string {
-	const part = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'longOffset' })
-		.formatToParts(new Date(instant))
-		.find((p) => p.type === 'timeZoneName')?.value
-	// "GMT" alone means +00:00.
-	const match = part?.match(/GMT([+-]\d{2}:\d{2})?/)
-	return match?.[1] ?? '+00:00'
-}
-
-function offsetMinutes(offset: string): number {
-	const sign = offset.startsWith('-') ? -1 : 1
-	const [h, m] = offset.slice(1).split(':').map(Number)
-	return sign * (h * 60 + m)
-}
-
-/** Local wall time in a zone as ISO-8601 with that zone's offset on that day. */
-export function zonedIso(date: string, time: string, timeZone: string): string {
-	const wall = Date.parse(`${date}T${time}:00Z`)
-	// Resolve twice so a DST change between the guess and the real instant settles.
-	let offset = offsetAt(wall, timeZone)
-	offset = offsetAt(wall - offsetMinutes(offset) * 60_000, timeZone)
-	return `${date}T${time}:00${offset}`
-}
-
-export function dueAtFor(batch: Pick<Batch, 'start'>, index: number, settings: ScheduleSettings): string {
-	return zonedIso(addDays(batch.start, index), settings.postTime, settings.timeZone)
 }
 
 export function windowEnd(batch: Pick<Batch, 'start'>, settings: ScheduleSettings): string {
@@ -86,8 +56,7 @@ export function usedFiles(schedule: Schedule): Map<string, string> {
 }
 
 /**
- * The window after the last batch, or tomorrow if the schedule is empty or behind:
- * today's post time may already be gone by the time a batch gets filled.
+ * The window after the last batch, or tomorrow if the schedule is empty or behind.
  */
 export function nextWindowStart(schedule: Schedule, on: string): string {
 	const earliest = addDays(on, 1)
@@ -113,8 +82,7 @@ export function validateSchedule(value: unknown): string | null {
 	if (!isRecord(value)) return 'not an object'
 	if (value.version !== 1) return 'version must be 1'
 	const settings = value.settings
-	if (!isRecord(settings) || typeof settings.postTime !== 'string' || !/^\d{2}:\d{2}$/.test(settings.postTime))
-		return 'settings.postTime must be HH:MM'
+	if (!isRecord(settings)) return 'settings must be an object'
 	if (typeof settings.timeZone !== 'string') return 'settings.timeZone must be a string'
 	if (settings.themeBefore !== undefined && settings.themeBefore !== 'light' && settings.themeBefore !== 'dark')
 		return 'settings.themeBefore must be light or dark'

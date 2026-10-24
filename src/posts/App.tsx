@@ -283,7 +283,7 @@ export function App() {
 							<header className="pane-head">
 								<h2>Batches</h2>
 								<span className="muted">
-									{schedule.settings.batchSize} posts, one a day at {schedule.settings.postTime} {schedule.settings.timeZone}, light and dark alternating
+									{schedule.settings.batchSize} posts, one per day using each channel's Buffer schedule, light and dark alternating
 								</span>
 								<label className="field-inline" title="Theme of the last post before the alternation started">
 									<span>Post before</span>
@@ -347,7 +347,6 @@ export function App() {
 					batch={selectedBatch}
 					index={selectedIndex}
 					item={selectedBatch?.items[selectedIndex] ?? null}
-					settings={schedule.settings}
 					handles={state.handles}
 					recordingsDir={config.recordingsDir}
 					dirty={dirty}

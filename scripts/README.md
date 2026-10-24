@@ -182,8 +182,9 @@ that channel's next configured slot: the power hours set up per channel. The
 three schedules have different empty days (TikTok has no wed/thu, YouTube no
 mon/wed), so queued posts can land on different days.
 
-With `--due-at` (which the scheduler always passes), every network gets
-`customScheduled` at that exact time.
+The batch scheduler omits `--due-at`, so every network uses `addToQueue` and its
+own configured Buffer schedule. Pass `--due-at` only for an explicitly requested
+one-off custom time.
 
 ### If a post fails
 
@@ -205,10 +206,10 @@ buffer posts delete --id <id>   # remove one
 
 Renders start out on local disk, in `RECORDINGS_DIR` (default
 `/home/luiz/oss/lofi-radio/recordings`): new ones at the root, archived ones in
-`backup/<YYYY-MM-DD[THH-MM-SS]>/`. A **batch** is up to 10 of them, posted one a
-day from its start date at `postTime` (18:00 by default, in the Buffer
-timezone). Batches follow each other in 10-day windows. 10 matches the Buffer
-plan's queue limit.
+`backup/<YYYY-MM-DD[THH-MM-SS]>/`. A **batch** is up to 10 of them, queued in
+order so Buffer places one per day in each channel's configured schedule.
+Batches follow each other in 10-day windows. 10 matches the Buffer plan's queue
+limit.
 
 There are two ways to drive it, and both read and write the same files.
 
@@ -287,8 +288,8 @@ For each video in the batch:
    `npx wrangler login` session, or `CLOUDFLARE_API_TOKEN` and
    `CLOUDFLARE_ACCOUNT_ID` from `.env`.
 2. **Caption** it as `{title} by {artist} {@handles}<br><br><br>{custom text}`.
-3. **Call `post-video.sh`** with `--due-at` for that day, then record each post id
-   in `schedule.json`.
+3. **Call `post-video.sh`** without `--due-at`, letting Buffer use each channel's
+   next configured queue slot, then record each post id in `schedule.json`.
 
 It saves after every video and keeps going past a failure, leaving the batch
 *partial*. A re-run only posts the networks that have no post id yet, so it

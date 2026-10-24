@@ -14,7 +14,7 @@
 
 import { existsSync } from 'node:fs'
 import { parseArgs } from 'node:util'
-import { dueAtFor, emptyItem, newBatch, nextBatch, nextWindowStart, sortBatches, windowEnd } from './lib/batches.ts'
+import { emptyItem, newBatch, nextBatch, nextWindowStart, sortBatches, windowEnd } from './lib/batches.ts'
 import { buildCaption, resolveItem } from './lib/caption.ts'
 import { buildCatalog, findVideo } from './lib/catalog.ts'
 import { RECORDINGS_DIR, today } from './lib/env.ts'
@@ -101,7 +101,7 @@ async function printBatches(schedule: Schedule): Promise<void> {
 			const resolved = resolveItem(item, video?.slug ?? item.file, video?.track ?? null)
 			const caption = buildCaption(resolved, item.extra, handles)
 			const done = SERVICES.filter((s) => item.posts[s]).join(',')
-			const due = batch.imported ? 'queued' : dueAtFor(batch, index, schedule.settings).slice(0, 16).replace('T', ' ')
+			const due = batch.imported || item.posts.youtube || item.posts.tiktok || item.posts.instagram ? 'queued' : 'Buffer queue'
 			const theme = themeOf(item.file)
 			const want = expected.get(item.file)
 			const flag = want && want !== theme ? `  ! needs ${want}` : ''

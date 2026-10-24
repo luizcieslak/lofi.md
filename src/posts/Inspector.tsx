@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
-import { dueAtFor } from '../../scripts/lib/batches.ts'
 import type { CatalogVideo } from '../../scripts/lib/catalog.ts'
 import { SERVICES } from '../../scripts/lib/types.ts'
-import type { Batch, BatchItem, Handles, ScheduleSettings, Service } from '../../scripts/lib/types.ts'
+import type { Batch, BatchItem, Handles, Service } from '../../scripts/lib/types.ts'
 import { api, bufferChannelUrl, previewUrl } from './api.ts'
 import { themeOf } from '../../scripts/lib/theme.ts'
 import { Chip, SERVICE_LABEL, ThemeSwatch, viewItem } from './ui.tsx'
@@ -13,7 +12,6 @@ interface Props {
 	batch: Batch | null
 	index: number
 	item: BatchItem | null
-	settings: ScheduleSettings
 	handles: Handles
 	recordingsDir: string
 	dirty: boolean
@@ -23,7 +21,7 @@ interface Props {
 
 type Preview = { state: 'idle' } | { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; payloads: { service: Service; payload: unknown }[] }
 
-export function Inspector({ file, video, batch, index, item, settings, handles, recordingsDir, dirty, onEdit, onClose }: Props) {
+export function Inspector({ file, video, batch, index, item, handles, recordingsDir, dirty, onEdit, onClose }: Props) {
 	const [preview, setPreview] = useState<Preview>({ state: 'idle' })
 	const editable = batch?.status === 'draft'
 	const draft = item ?? { title: null, artist: null, extra: '' }
@@ -88,7 +86,7 @@ export function Inspector({ file, video, batch, index, item, settings, handles, 
 					{batch && !batch.imported && (
 						<>
 							<dt>Posts</dt>
-							<dd>{dueAtFor(batch, index, settings).replace('T', ' ').slice(0, 16)} {settings.timeZone}</dd>
+							<dd>Day {index + 1} · next Buffer queue slot per channel</dd>
 						</>
 					)}
 					{item?.url && (

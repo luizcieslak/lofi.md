@@ -4,8 +4,8 @@
 #
 # Each post goes in with mode=addToQueue, so Buffer drops it into that channel's
 # next configured slot. Those slots are the power hours already set up in Buffer.
-# --due-at switches to customScheduled at that exact time instead; the scheduler
-# (scripts/schedule.ts) uses it to post one video a day.
+# --due-at switches to customScheduled at that exact time instead; the batch
+# scheduler intentionally omits it so each channel keeps its own schedule.
 #
 # Note: the three schedules have different empty days (TikTok has no wed/thu,
 # YouTube no mon/wed), so the posts often land on different *days*, not just

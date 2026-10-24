@@ -1,7 +1,7 @@
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { addDays, dueAtFor, windowEnd } from '../../scripts/lib/batches.ts'
+import { addDays, windowEnd } from '../../scripts/lib/batches.ts'
 import type { CatalogVideo } from '../../scripts/lib/catalog.ts'
 import { otherTheme, themeOf } from '../../scripts/lib/theme.ts'
 import type { Batch, BatchItem, Handles, ScheduleSettings, Theme } from '../../scripts/lib/types.ts'
@@ -75,7 +75,6 @@ export function BatchCard(props: Props) {
 							item={item}
 							index={index}
 							batch={batch}
-							settings={settings}
 							video={props.videos.get(item.file)}
 							handles={props.handles}
 							locked={locked}
@@ -112,7 +111,6 @@ function SlotItem({
 	item,
 	index,
 	batch,
-	settings,
 	video,
 	handles,
 	locked,
@@ -125,7 +123,6 @@ function SlotItem({
 	item: BatchItem
 	index: number
 	batch: Batch
-	settings: ScheduleSettings
 	video: CatalogVideo | undefined
 	handles: Handles
 	locked: boolean
@@ -141,7 +138,7 @@ function SlotItem({
 		disabled: locked,
 	})
 	const { resolved, caption } = viewItem(item, video, item.file, handles)
-	const day = batch.imported ? null : dueAtFor(batch, index, settings)
+	const day = batch.imported ? null : addDays(batch.start, index)
 	const theme = themeOf(item.file)
 	const wrongTheme = expected !== null && expected !== theme
 
@@ -168,7 +165,7 @@ function SlotItem({
 				: listeners)}
 			onClick={() => onSelect(item.file)}
 		>
-			<span className="slot-day">{day ? formatDay(day.slice(0, 10)) : `#${index + 1}`}</span>
+			<span className="slot-day">{day ? formatDay(day) : `#${index + 1}`}</span>
 			<Art src={video?.track?.albumArtUrl} />
 			<span className="row-text">
 				<span className="row-title">

@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process'
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { addDays, dueAtFor, emptyItem, isRecord, newBatch, nextBatch, nextWindowStart, postedServices, usedFiles } from './batches.ts'
+import { emptyItem, isRecord, newBatch, nextBatch, nextWindowStart, usedFiles } from './batches.ts'
 import { buildCaption, resolveItem } from './caption.ts'
 import { buildCatalog, findVideo } from './catalog.ts'
 import { POST_VIDEO, ROOT_DIR, SCRIPTS_DIR, today } from './env.ts'
@@ -25,8 +25,6 @@ export interface RunOptions {
 }
 
 const LOCK_FILE = join(SCRIPTS_DIR, '.schedule.lock')
-// Buffer rejects a dueAt in the past; leave room for the run itself.
-const MIN_LEAD_MS = 10 * 60 * 1000
 
 function isAlive(pid: number): boolean {
 	try {
@@ -65,6 +63,23 @@ export interface ScriptResult {
 	/** post-video.sh's per-network failure lines, with Buffer's message. */
 	failures: string[]
 	tail: string[]
+}
+
+interface QueuePostArgsOptions {
+	url: string
+	description: string
+	title: string
+	services: Service[]
+	draft: boolean
+	dryRun: boolean
+}
+
+/** Let Buffer place each network in its next configured queue slot. */
+export function queuePostArgs(options: QueuePostArgsOptions): string[] {
+	const args = ['--video', options.url, '--description', options.description, '--title', options.title, '--only', options.services.join(',')]
+	if (options.draft) args.push('--draft')
+	if (options.dryRun) args.push('--dry-run')
+	return args
 }
 
 /** post-video.sh for one item; --report json lines come back on stdout. */
@@ -186,16 +201,6 @@ async function run(options: RunOptions, emit: (e: RunEvent) => void): Promise<bo
 	}
 	persist()
 
-	// Every dueAt has to be in the future before anything is posted.
-	const late = batch.items
-		.map((item, index) => ({ item, index, dueAt: dueAtFor(batch, index, settings) }))
-		.filter(({ item, dueAt }) => postedServices(item).length < services.length && Date.parse(dueAt) < Date.now() + MIN_LEAD_MS)
-	if (late.length > 0) {
-		const message = `${late.length} post(s) would be due in the past (first: day ${late[0].index + 1}, ${late[0].dueAt}). Move ${batch.id}'s start to ${addDays(today(settings.timeZone), 1)} or later.`
-		if (!options.dryRun) throw new Error(message)
-		emit({ type: 'log', index: null, line: `warning: ${message}` })
-	}
-
 	// Light and dark always alternate, across batches too.
 	const outOfSequence = themeProblems(schedule, batch.id)
 	if (outOfSequence.length > 0) {
@@ -215,8 +220,7 @@ async function run(options: RunOptions, emit: (e: RunEvent) => void): Promise<bo
 		const video = findVideo(catalog, item.file)
 		const resolved = resolveItem(item, video?.slug ?? item.file, video?.track ?? null)
 		const caption = buildCaption(resolved, item.extra, handles)
-		const dueAt = dueAtFor(batch, index, settings)
-		emit({ type: 'item', index, file: item.file, title: caption.credit, dueAt })
+		emit({ type: 'item', index, file: item.file, title: caption.credit, dueAt: 'Buffer queue' })
 
 		const pending = services.filter((service) => !item.posts[service])
 		if (pending.length === 0) {
@@ -244,10 +248,14 @@ async function run(options: RunOptions, emit: (e: RunEvent) => void): Promise<bo
 				item.url = url
 			}
 
-			const args = ['--video', url, '--description', caption.description, '--title', caption.credit, '--due-at', dueAt]
-			args.push('--only', pending.join(','))
-			if (options.draft) args.push('--draft')
-			if (options.dryRun) args.push('--dry-run')
+			const args = queuePostArgs({
+				url,
+				description: caption.description,
+				title: caption.credit,
+				services: pending,
+				draft: options.draft,
+				dryRun: options.dryRun,
+			})
 			const result = await postVideo(args, (line) => emit({ type: 'log', index, line }))
 
 			for (const { service, payload } of result.payloads) emit({ type: 'payload', index, service, payload })
