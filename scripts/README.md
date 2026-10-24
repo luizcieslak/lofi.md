@@ -104,25 +104,28 @@ pnpm post -- \
 
 ### Setup
 
-Install the [Buffer CLI](https://buffer.com) and `jq`. This repo has its own Buffer
-profile in `.buffer/config.json` (gitignored), so it can post as the lofi.md
-account while other projects on this machine keep using `~/.config/buffer`. The
-CLI resolves flag → env → repo `.buffer/config.json` → global, and the scripts
-always call it from the repo root.
+Install the [Buffer CLI](https://buffer.com) and `jq`. This repo posts as the
+lofi.md account while other projects on this machine keep using
+`~/.config/buffer`. The CLI resolves flag → env → repo `.buffer/config.json` →
+global, but only stores the API key globally. So:
+
+- the key lives in `.env` as `BUFFER_API_KEY`. Every script here loads `.env`
+  before calling `buffer`, and the env var beats the global key;
+- the organization and timezone live in `.buffer/config.json` (gitignored).
+
+To run `buffer` by hand in this folder as the lofi.md account, load `.env` first
+(`set -a; . ./.env; set +a`). Without it, `buffer` uses the global account.
 
 1. In Buffer, logged in as the lofi.md account: **Settings → API**, create a key.
 2. In `.env`, set `BUFFER_API_KEY` (and `BUFFER_TIMEZONE`, default
    `America/Sao_Paulo`).
 3. `pnpm buffer:setup` lists the organizations for that key. Copy the lofi.md one
    into `BUFFER_ORGANIZATION_ID`, then run `pnpm buffer:setup` again. It writes
-   `.buffer/config.json` (mode 600) and prints the channels.
-4. Copy each channel `id` into `.env`:
-
-```
-BUFFER_YOUTUBE_CHANNEL_ID=
-BUFFER_TIKTOK_CHANNEL_ID=
-BUFFER_INSTAGRAM_CHANNEL_ID=
-```
+   the organization and timezone to `.buffer/config.json`, then fills
+   `BUFFER_YOUTUBE_CHANNEL_ID`, `BUFFER_TIKTOK_CHANNEL_ID` and
+   `BUFFER_INSTAGRAM_CHANNEL_ID` in `.env` from `buffer channels list`. It only
+   rewrites those lines. If a network has several channels, it lists them and
+   leaves that one for you to set.
 
 The setup script prints where each setting comes from, never its value.
 
