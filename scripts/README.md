@@ -144,6 +144,45 @@ local paths rather than failing halfway through.
 | `--only <list>`       | Subset, e.g. `--only tiktok,instagram`              |
 | `--draft`             | Save as drafts; nothing publishes                   |
 | `--dry-run`           | Validate payloads, make no API calls                |
+| `--latest`            | Batch mode: queue the next videos from R2 (below)   |
+| `--limit <n>`         | Batch size for `--latest` (default 10)              |
+| `--folder <name>`     | Use this R2 folder instead of the newest one        |
+
+`<br>` in a description becomes a line break.
+
+### Batch: the newest R2 folder
+
+```bash
+pnpm post -- --latest --dry-run   # preview the next 10 captions and payloads
+pnpm post -- --latest             # queue them
+```
+
+`--latest` lists `album-covers/lofi.md/` in R2 and picks the newest
+`YYYY-MM-DDTHH-MM-SS/` folder. Videos there are named
+`<kebab-case name>-<uuid>-1080x1920.mp4`. The name is the track title
+(`the-works`), artist + title (`quetzal-fig-pulp`), or the source file name. The
+script matches each file to `/api/tracks` on the radio API and captions it:
+
+```
+{title} by {artist} {@handles}<br><br><br>{extra}
+```
+
+Title and artist casing comes from the radio API. A file with no match falls back
+to its lowercase file name. Three files hold the rest:
+
+- [`instagram-handles.json`](instagram-handles.json): lowercase artist → handles.
+  Artists like `dEnk, Drumtomski` are split, and each one's handles are looked up.
+  Add new artists here, and future runs pick them up.
+- [`post-queue.json`](post-queue.json): posting order, plus optional `extra`
+  text (and `title`/`artist` overrides) keyed by the kebab-case file name. Videos
+  missing from the queue go last, alphabetically.
+- [`posted-videos.json`](posted-videos.json): videos already queued (not drafts
+  or dry runs), so the next run continues with the next batch.
+
+R2 listing uses the Cloudflare API with `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID` from `.env`. Without them, it falls back to the
+`npx wrangler login` session. The batch stops at the first failed video and
+doesn't mark that video as posted.
 
 ### What gets derived
 
